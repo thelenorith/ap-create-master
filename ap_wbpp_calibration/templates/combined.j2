@@ -25,12 +25,14 @@ console.flush();
 
 {% if flat_groups %}
 // ===== Processing Flat Frames =====
+{% for group in flat_groups %}
+{% if group.master_bias_enabled or group.master_dark_enabled %}
 // ===== Flats: Calibration Phase =====
-{% for group in flat_groups %}
 {% include 'ImageCalibration_flat.j2' %}
+{% endif %}
 // ===== Flats: Integration Phase =====
-{% for group in flat_groups %}
 {% include 'ImageIntegration_flat.j2' %}
+{% endfor %}
 {% endif %}
 
 console.writeln("\nAll calibration masters generated successfully!");

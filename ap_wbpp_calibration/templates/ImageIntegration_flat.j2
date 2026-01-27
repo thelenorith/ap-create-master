@@ -1,23 +1,41 @@
-// Find all calibrated flat files
-var calibratedDir = "{{ group.calibrated_dir }}";
-var calibratedFiles = [];
-var dir = new File(calibratedDir);
-if (dir.exists && dir.isDirectory) {
-    var files = File.findFiles(calibratedDir, "*_c.xisf", File.FlagCaseInsensitive);
-    for (var i = 0; i < files.length; i++) {
-        calibratedFiles.push(files[i]);
+// Determine which files to use: calibrated if calibration was performed, otherwise original raw files
+var useCalibrated = {{ (group.master_bias_enabled or group.master_dark_enabled)|lower }};
+var filesToIntegrate = [];
+
+if (useCalibrated) {
+    // Look for calibrated files
+    var calibratedDir = "{{ group.calibrated_dir }}";
+    var dir = new File(calibratedDir);
+    if (dir.exists && dir.isDirectory) {
+        var files = File.findFiles(calibratedDir, "*_c.xisf", File.FlagCaseInsensitive);
+        for (var i = 0; i < files.length; i++) {
+            filesToIntegrate.push(files[i]);
+        }
+    }
+    
+    if (filesToIntegrate.length === 0) {
+        console.writeln("WARNING: No calibrated flat files found in " + calibratedDir);
+        console.writeln("Falling back to original raw flat files");
+        useCalibrated = false;
     }
 }
 
-if (calibratedFiles.length === 0) {
-    console.writeln("ERROR: No calibrated flat files found in " + calibratedDir);
-    throw new Error("No calibrated files found");
+if (!useCalibrated) {
+    // Use original raw flat files
+{% for file_path in group.file_paths %}
+    filesToIntegrate.push("{{ file_path }}");
+{% endfor %}
+}
+
+if (filesToIntegrate.length === 0) {
+    console.writeln("ERROR: No flat files found for integration");
+    throw new Error("No flat files found");
 }
 
 var P = new ImageIntegration;
 P.images = []; // enabled, path, drizzlePath, localNormalizationDataPath
-for (var i = 0; i < calibratedFiles.length; i++) {
-    P.images.push([true, calibratedFiles[i], "", ""]);
+for (var i = 0; i < filesToIntegrate.length; i++) {
+    P.images.push([true, filesToIntegrate[i], "", ""]);
 }
 P.inputHints = "fits-keywords normalize only-first-image raw cfa use-roworder-keywords signed-is-physical";
 P.overrideImageType = true;
@@ -96,7 +114,11 @@ P.fileThreadOverload = 1.00;
 P.useBufferThreads = true;
 P.maxBufferThreads = 0;
 
+{% if group.master_bias_enabled or group.master_dark_enabled %}
 console.writeln("Integrating calibrated flat frames: {{ group.master_name }}");
+{% else %}
+console.writeln("Integrating raw flat frames (no calibration): {{ group.master_name }}");
+{% endif %}
 console.flush();
 
 P.executeGlobal();

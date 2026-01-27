@@ -113,7 +113,6 @@ def generate_combined_script(
         master_name = generate_master_filename(metadata, "bias")
         output_file = output_path / f"{master_name}.xisf"
         bias_contexts.append({
-            "metadata": metadata,
             "file_paths": [escape_js_string(p) for p in file_paths],
             "master_name": master_name,
             "output_path": escape_js_string(str(output_file)),
@@ -125,7 +124,6 @@ def generate_combined_script(
         master_name = generate_master_filename(metadata, "dark")
         output_file = output_path / f"{master_name}.xisf"
         dark_contexts.append({
-            "metadata": metadata,
             "file_paths": [escape_js_string(p) for p in file_paths],
             "master_name": master_name,
             "output_path": escape_js_string(str(output_file)),
@@ -139,7 +137,6 @@ def generate_combined_script(
         master_output_path = output_path / f"{master_name}.xisf"
         
         flat_contexts.append({
-            "metadata": metadata,
             "file_paths": [escape_js_string(p) for p in file_paths],
             "master_name": master_name,
             "calibrated_dir": escape_js_string(str(calibrated_dir)),
