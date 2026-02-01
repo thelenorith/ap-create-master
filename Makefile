@@ -34,7 +34,7 @@ test-verbose: install-dev
 	$(PYTHON) -m pytest -v
 
 typecheck: install-dev
-	$(PYTHON) -m mypy ap_create_master || true
+	$(PYTHON) -m mypy ap_create_master
 
 coverage: install-dev
 	$(PYTHON) -m pytest --cov=ap_create_master --cov-report=term

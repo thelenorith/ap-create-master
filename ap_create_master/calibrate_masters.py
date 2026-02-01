@@ -359,7 +359,6 @@ def main() -> int:
             args.dark_master_dir,
             args.script_dir,
             timestamp,
-            args.quiet,
         )
 
         if scripts:
