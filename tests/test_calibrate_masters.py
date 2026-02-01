@@ -39,20 +39,20 @@ class TestGenerateMasters:
         # Mock file discovery
         mock_get_filtered.return_value = {
             "bias1.fits": {
-                config.KEYWORD_TYPE: "bias",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_TYPE: "bias",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
             },
             "bias2.fits": {
-                config.KEYWORD_TYPE: "bias",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_TYPE: "bias",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
             },
         }
 
@@ -72,11 +72,11 @@ class TestGenerateMasters:
 
         # Mock metadata extraction
         mock_get_metadata.return_value = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         # Mock script generation
@@ -139,15 +139,15 @@ class TestGenerateMasters:
         # Mock flat file discovery
         mock_get_filtered.return_value = {
             "flat1.fits": {
-                config.KEYWORD_TYPE: "flat",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_DATE: "2026-01-15",
-                config.KEYWORD_FILTER: "B",
-                config.KEYWORD_EXPOSURESECONDS: "1.5",
+                config.NORMALIZED_HEADER_TYPE: "flat",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                config.NORMALIZED_HEADER_FILTER: "B",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
             }
         }
 
@@ -172,13 +172,13 @@ class TestGenerateMasters:
 
         # Mock metadata extraction
         mock_get_metadata.return_value = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-            config.KEYWORD_DATE: "2026-01-15",
-            config.KEYWORD_FILTER: "B",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
         }
 
         # Mock master finding
@@ -218,12 +218,12 @@ class TestGenerateMasters:
 
         mock_get_filtered.return_value = {
             "bias1.fits": {
-                config.KEYWORD_TYPE: "bias",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_TYPE: "bias",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
             }
         }
 
@@ -237,11 +237,11 @@ class TestGenerateMasters:
         }
 
         mock_get_metadata.return_value = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         mock_generate_script.return_value = "// Generated script"
@@ -268,7 +268,9 @@ class TestGenerateMasters:
 
         # Simulate ap-common failure for one frame type
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "").lower()
+            frame_type = (
+                kwargs.get("filters", {}).get(config.NORMALIZED_HEADER_TYPE, "").lower()
+            )
             if frame_type == "dark":
                 raise PermissionError("Access denied to directory")
             return {}
@@ -307,26 +309,26 @@ class TestGenerateMasters:
         # Flat with invalid exposure time (non-numeric string)
         mock_get_filtered.return_value = {
             "flat1.fits": {
-                config.KEYWORD_TYPE: "flat",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_DATE: "2026-01-15",
-                config.KEYWORD_FILTER: "B",
-                config.KEYWORD_EXPOSURESECONDS: "invalid",  # Non-numeric
+                config.NORMALIZED_HEADER_TYPE: "flat",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                config.NORMALIZED_HEADER_FILTER: "B",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "invalid",  # Non-numeric
             },
             "flat2.fits": {
-                config.KEYWORD_TYPE: "flat",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_DATE: "2026-01-15",
-                config.KEYWORD_FILTER: "B",
-                config.KEYWORD_EXPOSURESECONDS: "1.5",  # Valid
+                config.NORMALIZED_HEADER_TYPE: "flat",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                config.NORMALIZED_HEADER_FILTER: "B",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",  # Valid
             },
         }
 
@@ -353,13 +355,13 @@ class TestGenerateMasters:
         }
 
         mock_get_metadata.return_value = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-            config.KEYWORD_DATE: "2026-01-15",
-            config.KEYWORD_FILTER: "B",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
         }
 
         mock_find_master.return_value = "dark_master.xisf"

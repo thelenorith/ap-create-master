@@ -57,7 +57,7 @@ def generate_master_filename(metadata: Dict[str, str], frame_type: str) -> str:
     # Add parts from required keywords (excluding TYPE)
     required = config.REQUIRED_KEYWORDS[frame_type]
     for keyword in required:
-        if keyword == config.KEYWORD_TYPE:
+        if keyword == config.NORMALIZED_HEADER_TYPE:
             continue  # Skip TYPE keyword
 
         value = metadata.get(keyword, "UNKNOWN")

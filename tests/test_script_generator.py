@@ -50,11 +50,11 @@ class TestGenerateMasterFilename:
         }.get(k, k.upper())
 
         metadata = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
         filename = generate_master_filename(metadata, "bias")
         assert filename.startswith("masterBias")
@@ -74,12 +74,12 @@ class TestGenerateMasterFilename:
         }.get(k, k.upper())
 
         metadata = {
-            config.KEYWORD_EXPOSURESECONDS: "60.0",
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
         filename = generate_master_filename(metadata, "dark")
         assert filename.startswith("masterDark")
@@ -99,13 +99,13 @@ class TestGenerateMasterFilename:
         }.get(k, k.upper())
 
         metadata = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-            config.KEYWORD_DATE: "2026-01-15",
-            config.KEYWORD_FILTER: "B",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
         }
         filename = generate_master_filename(metadata, "flat")
         assert filename.startswith("masterFlat")
@@ -117,7 +117,7 @@ class TestGenerateMasterFilename:
         """Test that invalid filename characters are sanitized."""
         mock_denormalize.return_value = "TEST:KEY/with\\chars"
 
-        metadata = {config.KEYWORD_CAMERA: "test:value/with\\chars"}
+        metadata = {config.NORMALIZED_HEADER_CAMERA: "test:value/with\\chars"}
         filename = generate_master_filename(metadata, "bias")
         assert ":" not in filename
         assert "/" not in filename
@@ -139,11 +139,11 @@ class TestGenerateCombinedScript:
         bias_groups = [
             (
                 {
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-10.00",
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
                 },
                 ["file1.fits", "file2.fits"],
             )
@@ -162,12 +162,12 @@ class TestGenerateCombinedScript:
         dark_groups = [
             (
                 {
-                    config.KEYWORD_EXPOSURESECONDS: "60.0",
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-10.00",
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
                 },
                 ["dark1.fits", "dark2.fits"],
             )
@@ -183,13 +183,13 @@ class TestGenerateCombinedScript:
         flat_groups = [
             (
                 {
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-10.00",
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                    config.KEYWORD_DATE: "2026-01-15",
-                    config.KEYWORD_FILTER: "B",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                    config.NORMALIZED_HEADER_FILTER: "B",
                 },
                 ["flat1.fits", "flat2.fits"],
                 "bias_master.xisf",
@@ -210,13 +210,13 @@ class TestGenerateCombinedScript:
         flat_groups = [
             (
                 {
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-10.00",
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                    config.KEYWORD_DATE: "2026-01-15",
-                    config.KEYWORD_FILTER: "B",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                    config.NORMALIZED_HEADER_FILTER: "B",
                 },
                 ["flat1.fits", "flat2.fits"],
                 None,  # No bias master
@@ -236,13 +236,13 @@ class TestGenerateCombinedScript:
         flat_groups = [
             (
                 {
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-10.00",
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                    config.KEYWORD_DATE: "2026-01-15",
-                    config.KEYWORD_FILTER: "B",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                    config.NORMALIZED_HEADER_FILTER: "B",
                 },
                 ["D:/input/flat1.fits", "D:/input/flat2.fits", "D:/input/flat3.fits"],
                 "bias_master.xisf",

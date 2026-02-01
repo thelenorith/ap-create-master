@@ -48,7 +48,7 @@ def find_matching_master_for_flat(
     # Build filters dict: TYPE and all instrument settings
     # TYPE in master files is "MASTER BIAS" or "MASTER DARK" (uppercase, two words)
     filters = {
-        config.KEYWORD_TYPE: f"MASTER {master_type.upper()}",
+        config.NORMALIZED_HEADER_TYPE: f"MASTER {master_type.upper()}",
     }
 
     # Add instrument setting filters from flat headers
@@ -58,9 +58,11 @@ def find_matching_master_for_flat(
             filters[keyword] = str(value).strip()
 
     # Build required_properties list (TYPE + instrument settings + EXPOSURESECONDS for darks)
-    required_properties = [config.KEYWORD_TYPE] + list(config.MASTER_MATCH_KEYWORDS)
+    required_properties = [config.NORMALIZED_HEADER_TYPE] + list(
+        config.MASTER_MATCH_KEYWORDS
+    )
     if master_type == "dark":
-        required_properties.append(config.KEYWORD_EXPOSURESECONDS)
+        required_properties.append(config.NORMALIZED_HEADER_EXPOSURESECONDS)
 
     # Get filtered metadata using ap-common
     try:
@@ -119,7 +121,9 @@ def _find_best_dark_match(
         target_exposure = min(flat_exposure_times)
     else:
         # Use exposure from headers
-        target_exposure_raw: Any = flat_headers.get(config.KEYWORD_EXPOSURESECONDS)
+        target_exposure_raw: Any = flat_headers.get(
+            config.NORMALIZED_HEADER_EXPOSURESECONDS
+        )
         if target_exposure_raw is None:
             # No exposure time available, return first match
             return next(iter(matching_masters.keys()))
@@ -132,7 +136,7 @@ def _find_best_dark_match(
     # Extract exposure times from masters
     dark_candidates: list[DarkCandidate] = []
     for filename, metadata in matching_masters.items():
-        exposure = metadata.get(config.KEYWORD_EXPOSURESECONDS)
+        exposure = metadata.get(config.NORMALIZED_HEADER_EXPOSURESECONDS)
         if exposure is None:
             continue
         try:

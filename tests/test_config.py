@@ -12,15 +12,15 @@ class TestConfig:
 
     def test_keyword_constants_defined(self):
         """Test that all keyword constants are defined."""
-        assert config.KEYWORD_TYPE == "type"
-        assert config.KEYWORD_CAMERA == "camera"
-        assert config.KEYWORD_SETTEMP == "settemp"
-        assert config.KEYWORD_GAIN == "gain"
-        assert config.KEYWORD_OFFSET == "offset"
-        assert config.KEYWORD_READOUTMODE == "readoutmode"
-        assert config.KEYWORD_EXPOSURESECONDS == "exposureseconds"
-        assert config.KEYWORD_DATE == "date"
-        assert config.KEYWORD_FILTER == "filter"
+        assert config.NORMALIZED_HEADER_TYPE == "type"
+        assert config.NORMALIZED_HEADER_CAMERA == "camera"
+        assert config.NORMALIZED_HEADER_SETTEMP == "settemp"
+        assert config.NORMALIZED_HEADER_GAIN == "gain"
+        assert config.NORMALIZED_HEADER_OFFSET == "offset"
+        assert config.NORMALIZED_HEADER_READOUTMODE == "readoutmode"
+        assert config.NORMALIZED_HEADER_EXPOSURESECONDS == "exposureseconds"
+        assert config.NORMALIZED_HEADER_DATE == "date"
+        assert config.NORMALIZED_HEADER_FILTER == "filter"
 
     def test_required_keywords_structure(self):
         """Test that REQUIRED_KEYWORDS has correct structure."""
@@ -29,18 +29,23 @@ class TestConfig:
         assert "flat" in config.REQUIRED_KEYWORDS
 
         # Bias should not include exposureseconds
-        assert config.KEYWORD_EXPOSURESECONDS not in config.REQUIRED_KEYWORDS["bias"]
+        assert (
+            config.NORMALIZED_HEADER_EXPOSURESECONDS
+            not in config.REQUIRED_KEYWORDS["bias"]
+        )
         # Dark should include exposureseconds
-        assert config.KEYWORD_EXPOSURESECONDS in config.REQUIRED_KEYWORDS["dark"]
+        assert (
+            config.NORMALIZED_HEADER_EXPOSURESECONDS in config.REQUIRED_KEYWORDS["dark"]
+        )
         # Flat should include date and filter
-        assert config.KEYWORD_DATE in config.REQUIRED_KEYWORDS["flat"]
-        assert config.KEYWORD_FILTER in config.REQUIRED_KEYWORDS["flat"]
+        assert config.NORMALIZED_HEADER_DATE in config.REQUIRED_KEYWORDS["flat"]
+        assert config.NORMALIZED_HEADER_FILTER in config.REQUIRED_KEYWORDS["flat"]
 
     def test_master_match_keywords(self):
         """Test that MASTER_MATCH_KEYWORDS excludes date and filter."""
-        assert config.KEYWORD_DATE not in config.MASTER_MATCH_KEYWORDS
-        assert config.KEYWORD_FILTER not in config.MASTER_MATCH_KEYWORDS
-        assert config.KEYWORD_CAMERA in config.MASTER_MATCH_KEYWORDS
+        assert config.NORMALIZED_HEADER_DATE not in config.MASTER_MATCH_KEYWORDS
+        assert config.NORMALIZED_HEADER_FILTER not in config.MASTER_MATCH_KEYWORDS
+        assert config.NORMALIZED_HEADER_CAMERA in config.MASTER_MATCH_KEYWORDS
 
     def test_image_type_constants(self):
         """Test that PixInsight image type constants are defined."""

@@ -7,48 +7,55 @@ Defines required FITS keywords for grouping each frame type.
 Uses normalized keyword names from ap-common normalization.
 """
 
-# Normalized keyword names (as returned by ap-common)
-# These match the normalized output from ap_common.normalize_headers()
-KEYWORD_TYPE = "type"  # From IMAGETYP
-KEYWORD_CAMERA = "camera"  # From INSTRUME
-KEYWORD_SETTEMP = "settemp"  # From SET-TEMP or SETTEMP
-KEYWORD_GAIN = "gain"  # From GAIN (lowercase)
-KEYWORD_OFFSET = "offset"  # From OFFSET (lowercase)
-KEYWORD_READOUTMODE = "readoutmode"  # From READOUTM
-KEYWORD_EXPOSURESECONDS = "exposureseconds"  # From EXPOSURE/EXPTIME/EXP
-KEYWORD_DATE = "date"  # From DATE-OBS
-KEYWORD_FILTER = "filter"  # From FILTER
+# Import constants from ap-common
+from ap_common.constants import (
+    NORMALIZED_HEADER_TYPE,
+    NORMALIZED_HEADER_CAMERA,
+    NORMALIZED_HEADER_SETTEMP,
+    NORMALIZED_HEADER_GAIN,
+    NORMALIZED_HEADER_OFFSET,
+    NORMALIZED_HEADER_READOUTMODE,
+    NORMALIZED_HEADER_EXPOSURESECONDS,
+    NORMALIZED_HEADER_DATE,
+    NORMALIZED_HEADER_FILTER,
+    TYPE_BIAS,
+    TYPE_DARK,
+    TYPE_FLAT,
+)
+
+# Frame type list for processing
+FRAME_TYPES = [TYPE_BIAS.lower(), TYPE_DARK.lower(), TYPE_FLAT.lower()]
 
 # Required FITS keywords for grouping each frame type
 # Keys are frame types (as found in TYPE keyword)
 # Values are lists of normalized keyword names required for grouping
 REQUIRED_KEYWORDS = {
-    "bias": [
-        KEYWORD_TYPE,
-        KEYWORD_SETTEMP,
-        KEYWORD_GAIN,
-        KEYWORD_OFFSET,
-        KEYWORD_CAMERA,
-        KEYWORD_READOUTMODE,
+    TYPE_BIAS.lower(): [
+        NORMALIZED_HEADER_TYPE,
+        NORMALIZED_HEADER_SETTEMP,
+        NORMALIZED_HEADER_GAIN,
+        NORMALIZED_HEADER_OFFSET,
+        NORMALIZED_HEADER_CAMERA,
+        NORMALIZED_HEADER_READOUTMODE,
     ],
-    "dark": [
-        KEYWORD_TYPE,
-        KEYWORD_EXPOSURESECONDS,
-        KEYWORD_SETTEMP,
-        KEYWORD_GAIN,
-        KEYWORD_OFFSET,
-        KEYWORD_CAMERA,
-        KEYWORD_READOUTMODE,
+    TYPE_DARK.lower(): [
+        NORMALIZED_HEADER_TYPE,
+        NORMALIZED_HEADER_EXPOSURESECONDS,
+        NORMALIZED_HEADER_SETTEMP,
+        NORMALIZED_HEADER_GAIN,
+        NORMALIZED_HEADER_OFFSET,
+        NORMALIZED_HEADER_CAMERA,
+        NORMALIZED_HEADER_READOUTMODE,
     ],
-    "flat": [
-        KEYWORD_TYPE,
-        KEYWORD_FILTER,
-        KEYWORD_DATE,
-        KEYWORD_SETTEMP,
-        KEYWORD_GAIN,
-        KEYWORD_OFFSET,
-        KEYWORD_CAMERA,
-        KEYWORD_READOUTMODE,
+    TYPE_FLAT.lower(): [
+        NORMALIZED_HEADER_TYPE,
+        NORMALIZED_HEADER_FILTER,
+        NORMALIZED_HEADER_DATE,
+        NORMALIZED_HEADER_SETTEMP,
+        NORMALIZED_HEADER_GAIN,
+        NORMALIZED_HEADER_OFFSET,
+        NORMALIZED_HEADER_CAMERA,
+        NORMALIZED_HEADER_READOUTMODE,
     ],
 }
 
@@ -56,11 +63,11 @@ REQUIRED_KEYWORDS = {
 # These are the instrument settings that must match
 # (excludes DATE and FILTER, which are flat-specific)
 MASTER_MATCH_KEYWORDS = [
-    KEYWORD_CAMERA,
-    KEYWORD_SETTEMP,
-    KEYWORD_GAIN,
-    KEYWORD_OFFSET,
-    KEYWORD_READOUTMODE,
+    NORMALIZED_HEADER_CAMERA,
+    NORMALIZED_HEADER_SETTEMP,
+    NORMALIZED_HEADER_GAIN,
+    NORMALIZED_HEADER_OFFSET,
+    NORMALIZED_HEADER_READOUTMODE,
 ]
 
 # Frame types to ignore (e.g., lights)

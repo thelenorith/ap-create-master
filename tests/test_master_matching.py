@@ -23,22 +23,22 @@ class TestFindMatchingMasterForFlat:
         Path(master_dir).mkdir(parents=True, exist_ok=True)
         master_file = str(tmp_path / "masters" / "masterBias.xisf")
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         # ap-common returns dict with filename as key, metadata as value
         mock_get_metadata.return_value = {
             master_file: {
-                config.KEYWORD_TYPE: "MASTER BIAS",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_TYPE: "MASTER BIAS",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
             }
         }
 
@@ -54,23 +54,23 @@ class TestFindMatchingMasterForFlat:
         Path(master_dir).mkdir(parents=True, exist_ok=True)
         master_file = str(tmp_path / "masters" / "masterDark_60s.xisf")
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-            config.KEYWORD_EXPOSURESECONDS: "60.0",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
         }
 
         mock_get_metadata.return_value = {
             master_file: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "60.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
             }
         }
 
@@ -89,41 +89,41 @@ class TestFindMatchingMasterForFlat:
         master_70s = str(tmp_path / "masters" / "masterDark_70s.xisf")
 
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         # Flat exposure is 60s, should prefer 60s (exact match) over 50s or 70s
         mock_get_metadata.return_value = {
             master_50s: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "50.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "50.0",
             },
             master_60s: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "60.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
             },
             master_70s: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "70.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "70.0",
             },
         }
 
@@ -138,11 +138,11 @@ class TestFindMatchingMasterForFlat:
         """Test that function returns None when no matching master found."""
         master_dir = str(tmp_path / "masters")
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         mock_get_metadata.return_value = {}  # No matches
@@ -180,33 +180,33 @@ class TestFindMatchingMasterForFlat:
         master_180s = str(tmp_path / "masters" / "masterDark_180s.xisf")
 
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         # Flat exposure is 60s, but only have 120s and 180s darks
         # Should use 120s (closest higher exposure)
         mock_get_metadata.return_value = {
             master_120s: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "120.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "120.0",
             },
             master_180s: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "180.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "180.0",
             },
         }
 
@@ -227,23 +227,23 @@ class TestFindMatchingMasterForFlat:
 
         # Flat headers without exposure time
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
             # No KEYWORD_EXPOSURESECONDS
         }
 
         mock_get_metadata.return_value = {
             master_file: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "60.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
             }
         }
 
@@ -263,23 +263,23 @@ class TestFindMatchingMasterForFlat:
 
         # Flat headers with non-numeric exposure time
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-            config.KEYWORD_EXPOSURESECONDS: "not-a-number",  # Invalid
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "not-a-number",  # Invalid
         }
 
         mock_get_metadata.return_value = {
             master_file: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "60.0",
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
             }
         }
 
@@ -299,31 +299,31 @@ class TestFindMatchingMasterForFlat:
         master_invalid = str(tmp_path / "masters" / "masterDark_invalid.xisf")
 
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         mock_get_metadata.return_value = {
             master_valid: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "60.0",  # Valid
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",  # Valid
             },
             master_invalid: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "corrupted",  # Invalid, should be skipped
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "corrupted",  # Invalid, should be skipped
             },
         }
 
@@ -344,32 +344,32 @@ class TestFindMatchingMasterForFlat:
         master2 = str(tmp_path / "masters" / "masterDark2.xisf")
 
         flat_headers = {
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         # All masters have invalid exposure metadata
         mock_get_metadata.return_value = {
             master1: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "bad1",  # Invalid
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "bad1",  # Invalid
             },
             master2: {
-                config.KEYWORD_TYPE: "MASTER DARK",
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_SETTEMP: "-10.00",
-                config.KEYWORD_GAIN: "239",
-                config.KEYWORD_OFFSET: "150",
-                config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-                config.KEYWORD_EXPOSURESECONDS: "bad2",  # Invalid
+                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "bad2",  # Invalid
             },
         }
 

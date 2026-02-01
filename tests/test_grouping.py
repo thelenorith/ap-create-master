@@ -20,12 +20,12 @@ class TestCreateGroupKey:
     def test_bias_group_key(self):
         """Test creating group key for bias frames."""
         headers = {
-            config.KEYWORD_TYPE: "bias",
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
         key = create_group_key(headers, "bias")
         assert isinstance(key, tuple)
@@ -37,13 +37,13 @@ class TestCreateGroupKey:
     def test_dark_group_key(self):
         """Test creating group key for dark frames."""
         headers = {
-            config.KEYWORD_TYPE: "dark",
-            config.KEYWORD_EXPOSURESECONDS: "60.0",
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_TYPE: "dark",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
         key = create_group_key(headers, "dark")
         assert isinstance(key, tuple)
@@ -54,14 +54,14 @@ class TestCreateGroupKey:
     def test_flat_group_key(self):
         """Test creating group key for flat frames."""
         headers = {
-            config.KEYWORD_TYPE: "flat",
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
-            config.KEYWORD_DATE: "2026-01-15",
-            config.KEYWORD_FILTER: "B",
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
         }
         key = create_group_key(headers, "flat")
         assert isinstance(key, tuple)
@@ -72,8 +72,8 @@ class TestCreateGroupKey:
     def test_missing_values_become_empty_string(self):
         """Test that missing header values become empty strings."""
         headers = {
-            config.KEYWORD_TYPE: "bias",
-            config.KEYWORD_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
             # Missing other required keywords
         }
         key = create_group_key(headers, "bias")
@@ -94,34 +94,34 @@ class TestGroupFiles:
             {
                 "path": "file1.fits",
                 "headers": {
-                    config.KEYWORD_TYPE: "bias",
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-10.00",
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_TYPE: "bias",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
                 },
             },
             {
                 "path": "file2.fits",
                 "headers": {
-                    config.KEYWORD_TYPE: "bias",
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-10.00",
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_TYPE: "bias",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
                 },
             },
             {
                 "path": "file3.fits",
                 "headers": {
-                    config.KEYWORD_TYPE: "bias",
-                    config.KEYWORD_CAMERA: "ATR585M",
-                    config.KEYWORD_SETTEMP: "-9.00",  # Different temp
-                    config.KEYWORD_GAIN: "239",
-                    config.KEYWORD_OFFSET: "150",
-                    config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                    config.NORMALIZED_HEADER_TYPE: "bias",
+                    config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                    config.NORMALIZED_HEADER_SETTEMP: "-9.00",  # Different temp
+                    config.NORMALIZED_HEADER_GAIN: "239",
+                    config.NORMALIZED_HEADER_OFFSET: "150",
+                    config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
                 },
             },
         ]
@@ -143,29 +143,29 @@ class TestGetGroupMetadata:
     def test_extract_metadata_for_bias(self):
         """Test extracting metadata for bias frames."""
         headers = {
-            config.KEYWORD_TYPE: "bias",
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
         metadata = get_group_metadata(headers, "bias")
-        assert metadata[config.KEYWORD_TYPE] == "bias"
-        assert metadata[config.KEYWORD_CAMERA] == "ATR585M"
-        assert metadata[config.KEYWORD_SETTEMP] == "-10.00"
+        assert metadata[config.NORMALIZED_HEADER_TYPE] == "bias"
+        assert metadata[config.NORMALIZED_HEADER_CAMERA] == "ATR585M"
+        assert metadata[config.NORMALIZED_HEADER_SETTEMP] == "-10.00"
 
     def test_missing_values_not_included(self):
         """Test that missing header values are not included in metadata."""
         headers = {
-            config.KEYWORD_TYPE: "bias",
-            config.KEYWORD_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
             # Missing other keywords
         }
         metadata = get_group_metadata(headers, "bias")
-        assert config.KEYWORD_TYPE in metadata
-        assert config.KEYWORD_CAMERA in metadata
-        assert config.KEYWORD_SETTEMP not in metadata
+        assert config.NORMALIZED_HEADER_TYPE in metadata
+        assert config.NORMALIZED_HEADER_CAMERA in metadata
+        assert config.NORMALIZED_HEADER_SETTEMP not in metadata
 
     def test_unknown_frame_type_raises_error(self):
         """Test that unknown frame type raises ValueError."""

@@ -37,17 +37,19 @@ class TestRealWorldWorkflows:
 
         # Mock dark file discovery only
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "DARK":
                 return {
                     "dark1.fits": {
-                        config.KEYWORD_TYPE: "dark",
-                        config.KEYWORD_EXPOSURESECONDS: "60.0",
-                        config.KEYWORD_CAMERA: "ATR585M",
-                        config.KEYWORD_SETTEMP: "-10.00",
-                        config.KEYWORD_GAIN: "239",
-                        config.KEYWORD_OFFSET: "150",
-                        config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+                        config.NORMALIZED_HEADER_TYPE: "dark",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+                        config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                        config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                        config.NORMALIZED_HEADER_GAIN: "239",
+                        config.NORMALIZED_HEADER_OFFSET: "150",
+                        config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
                     }
                 }
             return {}
@@ -67,12 +69,12 @@ class TestRealWorldWorkflows:
         }
 
         mock_get_metadata.return_value = {
-            config.KEYWORD_EXPOSURESECONDS: "60.0",
-            config.KEYWORD_CAMERA: "ATR585M",
-            config.KEYWORD_SETTEMP: "-10.00",
-            config.KEYWORD_GAIN: "239",
-            config.KEYWORD_OFFSET: "150",
-            config.KEYWORD_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
         }
 
         mock_generate_script.return_value = "// Generated script"
@@ -105,14 +107,16 @@ class TestRealWorldWorkflows:
 
         # Mock both bias and dark discovery
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.KEYWORD_TYPE: "bias"}}
+                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
             elif frame_type == "DARK":
                 return {
                     "dark1.fits": {
-                        config.KEYWORD_TYPE: "dark",
-                        config.KEYWORD_EXPOSURESECONDS: "60.0",
+                        config.NORMALIZED_HEADER_TYPE: "dark",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
                     }
                 }
             return {}
@@ -129,10 +133,10 @@ class TestRealWorldWorkflows:
         mock_group_files.side_effect = group_side_effect
 
         mock_get_metadata.side_effect = [
-            {config.KEYWORD_CAMERA: "ATR585M"},  # bias metadata
+            {config.NORMALIZED_HEADER_CAMERA: "ATR585M"},  # bias metadata
             {
-                config.KEYWORD_CAMERA: "ATR585M",
-                config.KEYWORD_EXPOSURESECONDS: "60.0",
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
             },  # dark metadata
         ]
 
@@ -170,23 +174,25 @@ class TestRealWorldWorkflows:
 
         # Mock all three frame types
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.KEYWORD_TYPE: "bias"}}
+                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
             elif frame_type == "DARK":
                 return {
                     "dark1.fits": {
-                        config.KEYWORD_TYPE: "dark",
-                        config.KEYWORD_EXPOSURESECONDS: "60.0",
+                        config.NORMALIZED_HEADER_TYPE: "dark",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
                     }
                 }
             elif frame_type == "FLAT":
                 return {
                     "flat1.fits": {
-                        config.KEYWORD_TYPE: "flat",
-                        config.KEYWORD_FILTER: "B",
-                        config.KEYWORD_DATE: "2026-01-15",
-                        config.KEYWORD_EXPOSURESECONDS: "1.5",
+                        config.NORMALIZED_HEADER_TYPE: "flat",
+                        config.NORMALIZED_HEADER_FILTER: "B",
+                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
                     }
                 }
             return {}
@@ -203,7 +209,9 @@ class TestRealWorldWorkflows:
                     ("flat", "B", "2026-01-15"): [
                         {
                             "path": "flat1.fits",
-                            "headers": {config.KEYWORD_EXPOSURESECONDS: "1.5"},
+                            "headers": {
+                                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"
+                            },
                         }
                     ]
                 }
@@ -212,11 +220,11 @@ class TestRealWorldWorkflows:
         mock_group_files.side_effect = group_side_effect
 
         mock_get_metadata.side_effect = [
-            {config.KEYWORD_CAMERA: "ATR585M"},  # bias metadata
-            {config.KEYWORD_EXPOSURESECONDS: "60.0"},  # dark metadata
+            {config.NORMALIZED_HEADER_CAMERA: "ATR585M"},  # bias metadata
+            {config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0"},  # dark metadata
             {
-                config.KEYWORD_FILTER: "B",
-                config.KEYWORD_DATE: "2026-01-15",
+                config.NORMALIZED_HEADER_FILTER: "B",
+                config.NORMALIZED_HEADER_DATE: "2026-01-15",
             },  # flat metadata
         ]
 
@@ -253,20 +261,22 @@ class TestRealWorldWorkflows:
 
         # Mock darks with different exposures
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "DARK":
                 return {
                     "dark_60s.fits": {
-                        config.KEYWORD_TYPE: "dark",
-                        config.KEYWORD_EXPOSURESECONDS: "60.0",
+                        config.NORMALIZED_HEADER_TYPE: "dark",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
                     },
                     "dark_120s.fits": {
-                        config.KEYWORD_TYPE: "dark",
-                        config.KEYWORD_EXPOSURESECONDS: "120.0",
+                        config.NORMALIZED_HEADER_TYPE: "dark",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "120.0",
                     },
                     "dark_300s.fits": {
-                        config.KEYWORD_TYPE: "dark",
-                        config.KEYWORD_EXPOSURESECONDS: "300.0",
+                        config.NORMALIZED_HEADER_TYPE: "dark",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "300.0",
                     },
                 }
             return {}
@@ -280,9 +290,9 @@ class TestRealWorldWorkflows:
         }
 
         mock_get_metadata.side_effect = [
-            {config.KEYWORD_EXPOSURESECONDS: "60.0"},
-            {config.KEYWORD_EXPOSURESECONDS: "120.0"},
-            {config.KEYWORD_EXPOSURESECONDS: "300.0"},
+            {config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0"},
+            {config.NORMALIZED_HEADER_EXPOSURESECONDS: "120.0"},
+            {config.NORMALIZED_HEADER_EXPOSURESECONDS: "300.0"},
         ]
 
         mock_generate_script.return_value = "// Generated script"
@@ -312,16 +322,18 @@ class TestRealWorldWorkflows:
         os.makedirs(input_dir, exist_ok=True)
 
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.KEYWORD_TYPE: "bias"}}
+                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
             return {}
 
         mock_get_filtered.side_effect = side_effect
         mock_group_files.return_value = {
             ("bias",): [{"path": "bias1.fits", "headers": {}}]
         }
-        mock_get_metadata.return_value = {config.KEYWORD_CAMERA: "ATR585M"}
+        mock_get_metadata.return_value = {config.NORMALIZED_HEADER_CAMERA: "ATR585M"}
         mock_generate_script.return_value = "// Generated script"
 
         scripts = generate_masters(input_dir, output_dir)
@@ -354,14 +366,16 @@ class TestRealWorldWorkflows:
         os.makedirs(input_dir, exist_ok=True)
 
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "FLAT":
                 return {
                     "flat1.fits": {
-                        config.KEYWORD_TYPE: "flat",
-                        config.KEYWORD_FILTER: "B",
-                        config.KEYWORD_DATE: "2026-01-15",
-                        config.KEYWORD_EXPOSURESECONDS: "1.5",
+                        config.NORMALIZED_HEADER_TYPE: "flat",
+                        config.NORMALIZED_HEADER_FILTER: "B",
+                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
                     }
                 }
             return {}
@@ -371,13 +385,13 @@ class TestRealWorldWorkflows:
             ("flat", "B", "2026-01-15"): [
                 {
                     "path": "flat1.fits",
-                    "headers": {config.KEYWORD_EXPOSURESECONDS: "1.5"},
+                    "headers": {config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"},
                 }
             ]
         }
         mock_get_metadata.return_value = {
-            config.KEYWORD_FILTER: "B",
-            config.KEYWORD_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
         }
         mock_find_master.side_effect = ["bias_master.xisf", "dark_master.xisf"]
         mock_generate_script.return_value = "// Generated script"
@@ -414,14 +428,16 @@ class TestRealWorldWorkflows:
         os.makedirs(input_dir, exist_ok=True)
 
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "FLAT":
                 return {
                     "flat1.fits": {
-                        config.KEYWORD_TYPE: "flat",
-                        config.KEYWORD_FILTER: "B",
-                        config.KEYWORD_DATE: "2026-01-15",
-                        config.KEYWORD_EXPOSURESECONDS: "1.5",
+                        config.NORMALIZED_HEADER_TYPE: "flat",
+                        config.NORMALIZED_HEADER_FILTER: "B",
+                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
                     }
                 }
             return {}
@@ -431,13 +447,13 @@ class TestRealWorldWorkflows:
             ("flat", "B", "2026-01-15"): [
                 {
                     "path": "flat1.fits",
-                    "headers": {config.KEYWORD_EXPOSURESECONDS: "1.5"},
+                    "headers": {config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"},
                 }
             ]
         }
         mock_get_metadata.return_value = {
-            config.KEYWORD_FILTER: "B",
-            config.KEYWORD_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
         }
         mock_generate_script.return_value = "// Generated script"
 
@@ -473,16 +489,18 @@ class TestRealWorldWorkflows:
         os.makedirs(input_dir, exist_ok=True)
 
         def side_effect(*args, **kwargs):
-            frame_type = kwargs.get("filters", {}).get(config.KEYWORD_TYPE, "")
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.KEYWORD_TYPE: "bias"}}
+                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
             elif frame_type == "FLAT":
                 return {
                     "flat1.fits": {
-                        config.KEYWORD_TYPE: "flat",
-                        config.KEYWORD_FILTER: "B",
-                        config.KEYWORD_DATE: "2026-01-15",
-                        config.KEYWORD_EXPOSURESECONDS: "1.5",
+                        config.NORMALIZED_HEADER_TYPE: "flat",
+                        config.NORMALIZED_HEADER_FILTER: "B",
+                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
+                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
                     }
                 }
             return {}
@@ -497,7 +515,9 @@ class TestRealWorldWorkflows:
                     ("flat", "B", "2026-01-15"): [
                         {
                             "path": "flat1.fits",
-                            "headers": {config.KEYWORD_EXPOSURESECONDS: "1.5"},
+                            "headers": {
+                                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"
+                            },
                         }
                     ]
                 }
@@ -506,10 +526,10 @@ class TestRealWorldWorkflows:
         mock_group_files.side_effect = group_side_effect
 
         mock_get_metadata.side_effect = [
-            {config.KEYWORD_CAMERA: "ATR585M"},  # bias metadata
+            {config.NORMALIZED_HEADER_CAMERA: "ATR585M"},  # bias metadata
             {
-                config.KEYWORD_FILTER: "B",
-                config.KEYWORD_DATE: "2026-01-15",
+                config.NORMALIZED_HEADER_FILTER: "B",
+                config.NORMALIZED_HEADER_DATE: "2026-01-15",
             },  # flat metadata
         ]
 
@@ -547,11 +567,13 @@ class TestOutputStructure:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
-        mock_get_filtered.return_value = {"bias1.fits": {config.KEYWORD_TYPE: "bias"}}
+        mock_get_filtered.return_value = {
+            "bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}
+        }
         mock_group_files.return_value = {
             ("bias",): [{"path": "bias1.fits", "headers": {}}]
         }
-        mock_get_metadata.return_value = {config.KEYWORD_CAMERA: "ATR585M"}
+        mock_get_metadata.return_value = {config.NORMALIZED_HEADER_CAMERA: "ATR585M"}
         mock_generate_script.return_value = "// Generated script"
 
         scripts = generate_masters(input_dir, output_dir)
@@ -583,11 +605,13 @@ class TestOutputStructure:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
-        mock_get_filtered.return_value = {"bias1.fits": {config.KEYWORD_TYPE: "bias"}}
+        mock_get_filtered.return_value = {
+            "bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}
+        }
         mock_group_files.return_value = {
             ("bias",): [{"path": "bias1.fits", "headers": {}}]
         }
-        mock_get_metadata.return_value = {config.KEYWORD_CAMERA: "ATR585M"}
+        mock_get_metadata.return_value = {config.NORMALIZED_HEADER_CAMERA: "ATR585M"}
         mock_generate_script.return_value = "// Generated script"
 
         scripts = generate_masters(input_dir, output_dir, timestamp="20260127_120000")
