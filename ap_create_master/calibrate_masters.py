@@ -31,6 +31,8 @@ def generate_masters(
     dark_master_dir: Optional[str] = None,
     script_output_dir: Optional[str] = None,
     timestamp: Optional[str] = None,
+    debug: bool = False,
+    dryrun: bool = False,
 ) -> List[str]:
     """
     Generate calibration masters from input directory.
@@ -42,6 +44,8 @@ def generate_masters(
         dark_master_dir: Directory containing dark masters (for flat calibration)
         script_output_dir: Directory for generated JS scripts (default: output_dir/logs)
         timestamp: Timestamp string for script filename (default: current time)
+        debug: Enable debug output
+        dryrun: Show what would be done without writing scripts
 
     Returns:
         List of generated script file paths
@@ -144,11 +148,13 @@ def generate_masters(
                         pass
 
             if bias_master_dir:
+                logger.debug("Looking for bias master for group...")
                 master_bias_xisf = find_matching_master_for_flat(
                     bias_master_dir, first_file["headers"], "bias"
                 )
 
             if dark_master_dir:
+                logger.debug("Looking for dark master for group...")
                 master_dark_xisf = find_matching_master_for_flat(
                     dark_master_dir,
                     first_file["headers"],
@@ -167,10 +173,13 @@ def generate_masters(
 
     # Generate single combined script
     if bias_groups_list or dark_groups_list or flat_groups_list:
-        print("\nGenerating combined script...")
+        if dryrun:
+            print("\n[DRYRUN] Would generate combined script...")
+        else:
+            print("\nGenerating combined script...")
 
         # Create calibrated directories for flat groups (if using masters)
-        if flat_groups_list:
+        if flat_groups_list and not dryrun:
             for (
                 metadata,
                 file_paths,
@@ -191,22 +200,30 @@ def generate_masters(
 
         # Define log file path (same directory, same timestamp)
         log_file_path = script_dir / f"{timestamp}.log"
-
-        combined_script = generate_combined_script(
-            str(master_dir),
-            bias_groups_list,
-            dark_groups_list,
-            flat_groups_list,
-            str(log_file_path),
-            str(output_path),  # calibrated_base_dir
-        )
-
         script_path = script_dir / f"{timestamp}_calibrate_masters.js"
-        script_path.write_text(combined_script, encoding="utf-8")
-        logger.info(
-            f"Generated script: {script_path.name}, console_log: {log_file_path.name}"
-        )
-        return [str(script_path)]
+
+        if dryrun:
+            print(f"[DRYRUN] Would write script to: {script_path}")
+            print(f"[DRYRUN] Would log to: {log_file_path}")
+            print(
+                f"[DRYRUN] Summary: {len(bias_groups_list)} bias, {len(dark_groups_list)} dark, {len(flat_groups_list)} flat groups"
+            )
+            return []
+        else:
+            combined_script = generate_combined_script(
+                str(master_dir),
+                bias_groups_list,
+                dark_groups_list,
+                flat_groups_list,
+                str(log_file_path),
+                str(output_path),  # calibrated_base_dir
+            )
+
+            script_path.write_text(combined_script, encoding="utf-8")
+            logger.info(
+                f"Generated script: {script_path.name}, console_log: {log_file_path.name}"
+            )
+            return [str(script_path)]
 
     return []
 
@@ -332,6 +349,11 @@ def main() -> int:
         help="Generate scripts only, do not execute PixInsight",
     )
     parser.add_argument(
+        "--dryrun",
+        action="store_true",
+        help="Show what would be done without writing scripts or executing PixInsight",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Enable debug output",
@@ -359,9 +381,14 @@ def main() -> int:
             args.dark_master_dir,
             args.script_dir,
             timestamp,
+            debug=args.debug,
+            dryrun=args.dryrun,
         )
 
-        if scripts:
+        if args.dryrun:
+            # Dryrun mode: no scripts were written
+            print("\n[DRYRUN] Completed. No scripts written, no execution performed.")
+        elif scripts:
             print(f"Generated combined script: {Path(scripts[0]).name}")
             print(f"Script location: {Path(scripts[0]).parent}")
             print(f"Masters will be output to: {args.output_dir}")
@@ -375,7 +402,7 @@ def main() -> int:
                     print(
                         "ERROR: --pixinsight-binary is required to execute PixInsight"
                     )
-                    print("Use --script-only to generate scripts without executing")
+                    print("Use --script-only or --dryrun to skip execution")
                     return 1
 
                 exit_code = run_pixinsight(

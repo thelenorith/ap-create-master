@@ -33,7 +33,7 @@ class TestFindMatchingMasterForFlat:
         # ap-common returns dict with filename as key, metadata as value
         mock_get_metadata.return_value = {
             master_file: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER BIAS",
+                config.NORMALIZED_HEADER_TYPE: "BIAS",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -64,7 +64,7 @@ class TestFindMatchingMasterForFlat:
 
         mock_get_metadata.return_value = {
             master_file: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -99,7 +99,7 @@ class TestFindMatchingMasterForFlat:
         # Flat exposure is 60s, should prefer 60s (exact match) over 50s or 70s
         mock_get_metadata.return_value = {
             master_50s: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -108,7 +108,7 @@ class TestFindMatchingMasterForFlat:
                 config.NORMALIZED_HEADER_EXPOSURESECONDS: "50.0",
             },
             master_60s: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -117,7 +117,7 @@ class TestFindMatchingMasterForFlat:
                 config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
             },
             master_70s: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -191,7 +191,7 @@ class TestFindMatchingMasterForFlat:
         # Should use 120s (closest higher exposure)
         mock_get_metadata.return_value = {
             master_120s: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -200,7 +200,7 @@ class TestFindMatchingMasterForFlat:
                 config.NORMALIZED_HEADER_EXPOSURESECONDS: "120.0",
             },
             master_180s: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -237,7 +237,7 @@ class TestFindMatchingMasterForFlat:
 
         mock_get_metadata.return_value = {
             master_file: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -273,7 +273,7 @@ class TestFindMatchingMasterForFlat:
 
         mock_get_metadata.return_value = {
             master_file: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -308,7 +308,7 @@ class TestFindMatchingMasterForFlat:
 
         mock_get_metadata.return_value = {
             master_valid: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -317,7 +317,7 @@ class TestFindMatchingMasterForFlat:
                 config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",  # Valid
             },
             master_invalid: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -354,7 +354,7 @@ class TestFindMatchingMasterForFlat:
         # All masters have invalid exposure metadata
         mock_get_metadata.return_value = {
             master1: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -363,7 +363,7 @@ class TestFindMatchingMasterForFlat:
                 config.NORMALIZED_HEADER_EXPOSURESECONDS: "bad1",  # Invalid
             },
             master2: {
-                config.NORMALIZED_HEADER_TYPE: "MASTER DARK",
+                config.NORMALIZED_HEADER_TYPE: "DARK",
                 config.NORMALIZED_HEADER_CAMERA: "ATR585M",
                 config.NORMALIZED_HEADER_SETTEMP: "-10.00",
                 config.NORMALIZED_HEADER_GAIN: "239",
@@ -378,3 +378,35 @@ class TestFindMatchingMasterForFlat:
         )
         # Should return first match when no valid exposure times found
         assert result in [master1, master2]
+
+    @patch("ap_common.get_filtered_metadata")
+    def test_uses_correct_type_filters_for_pixinsight_inconsistency(
+        self, mock_get_metadata, tmp_path
+    ):
+        """Test that correct type filters are used (BIAS/DARK not MASTER BIAS/MASTER DARK)."""
+        master_dir = str(tmp_path / "masters")
+        Path(master_dir).mkdir(parents=True, exist_ok=True)
+        flat_headers = {
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+
+        mock_get_metadata.return_value = {}
+
+        # Test bias - should use 'BIAS' not 'MASTER BIAS'
+        find_matching_master_for_flat(master_dir, flat_headers, "bias")
+        bias_call = mock_get_metadata.call_args
+        assert bias_call.kwargs["filters"]["type"] == "BIAS"
+
+        # Test dark - should use 'DARK' not 'MASTER DARK'
+        find_matching_master_for_flat(master_dir, flat_headers, "dark")
+        dark_call = mock_get_metadata.call_args
+        assert dark_call.kwargs["filters"]["type"] == "DARK"
+
+        # Test flat - should use 'MASTER FLAT' (flat is the exception)
+        find_matching_master_for_flat(master_dir, flat_headers, "flat")
+        flat_call = mock_get_metadata.call_args
+        assert flat_call.kwargs["filters"]["type"] == "MASTER FLAT"
