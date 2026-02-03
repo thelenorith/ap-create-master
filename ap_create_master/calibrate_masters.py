@@ -444,7 +444,7 @@ def main() -> int:
     args = parser.parse_args()
 
     # Setup logging
-    logger = setup_logging(name="ap_create_master", debug=args.debug)
+    logger = setup_logging(name="ap_create_master", debug=args.debug, quiet=args.quiet)
 
     try:
         # Generate timestamp once to use for both script and log
