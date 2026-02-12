@@ -6,6 +6,7 @@ Find matching bias/dark masters for flat calibration.
 
 import logging
 import ap_common
+from ap_common.metadata import build_normalized_filters
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TypedDict
 
@@ -55,15 +56,11 @@ def find_matching_master_for_flat(
     # TYPE format: "MASTER BIAS", "MASTER DARK", "MASTER FLAT"
     # These are written by ap-create-master after PixInsight generates masters
     type_value = f"MASTER {master_type.upper()}"
-    filters = {
-        config.NORMALIZED_HEADER_TYPE: type_value,
-    }
-
-    # Add instrument setting filters from flat headers
-    for keyword in config.MASTER_MATCH_KEYWORDS:
-        value = flat_headers.get(keyword)
-        if value is not None:
-            filters[keyword] = str(value).strip()
+    filters = build_normalized_filters(
+        flat_headers,
+        config.MASTER_MATCH_KEYWORDS,
+        overrides={config.NORMALIZED_HEADER_TYPE: type_value},
+    )
 
     logger.debug(f"Filters: {filters}")
 
