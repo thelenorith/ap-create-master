@@ -29,6 +29,10 @@ logger = logging.getLogger(__name__)
 
 POLLING_FREQUENCY_SECONDS = 1
 
+# Set default description width for aligned progress bars
+# Aligns: "Loading metadata", "Enriching metadata", "Calibrating flats", "Creating masters"
+ProgressTracker.set_default_desc_width(20)
+
 
 def get_expected_output_files(
     master_dir: Path,
