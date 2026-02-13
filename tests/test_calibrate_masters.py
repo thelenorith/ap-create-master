@@ -265,7 +265,7 @@ class TestGenerateMasters:
 
     @patch("ap_common.get_filtered_metadata")
     def test_handles_ap_common_exception_gracefully(
-        self, mock_get_filtered, tmp_path, capsys
+        self, mock_get_filtered, tmp_path, caplog
     ):
         """Test that exceptions from ap-common are handled gracefully."""
         input_dir = str(tmp_path / "input")
@@ -287,10 +287,12 @@ class TestGenerateMasters:
 
         # Should still complete successfully, just with no dark files
         assert scripts == []
-        # Should print warning about failed discovery
-        captured = capsys.readouterr()
-        assert "Warning" in captured.out
-        assert "dark" in captured.out.lower()
+        # Should log warning about failed discovery
+        assert any(
+            "Failed to discover dark files" in record.message
+            and record.levelname == "WARNING"
+            for record in caplog.records
+        )
 
     @patch("ap_common.get_filtered_metadata")
     @patch("ap_create_master.calibrate_masters.group_files")

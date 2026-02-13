@@ -60,6 +60,23 @@ python -m ap_create_master /path/to/flats /path/to/output \
 python -m ap_create_master /path/to/calibration /path/to/output --script-only
 ```
 
+**Dry run to see what would be generated:**
+```bash
+python -m ap_create_master /path/to/calibration /path/to/output --dryrun
+```
+
+**With debug output:**
+```bash
+python -m ap_create_master /path/to/calibration /path/to/output --debug \
+    --pixinsight-binary "C:\Program Files\PixInsight\bin\PixInsight.exe"
+```
+
+**Quiet mode (minimal output):**
+```bash
+python -m ap_create_master /path/to/calibration /path/to/output --quiet \
+    --pixinsight-binary "C:\Program Files\PixInsight\bin\PixInsight.exe"
+```
+
 ## Important Limitation
 
 Masters created in a run are **not used** for flat calibration in that same run. To calibrate flats, you must use existing masters from a library or run in stages:
@@ -114,6 +131,7 @@ Frames must have proper FITS keywords:
 python -m ap_create_master [-h] [--bias-master-dir DIR] [--dark-master-dir DIR]
                                 [--script-dir DIR] [--pixinsight-binary PATH]
                                 [--instance-id ID] [--no-force-exit] [--script-only]
+                                [--dryrun] [--debug] [--quiet]
                                 input_dir output_dir
 
 positional arguments:
@@ -129,6 +147,9 @@ optional arguments:
   --instance-id         PixInsight instance ID (default: 123)
   --no-force-exit       Keep PixInsight open after execution completes
   --script-only         Generate scripts only, do not execute PixInsight
+  --dryrun              Show what would be done without executing
+  --debug               Enable debug logging
+  --quiet, -q           Suppress progress output
 ```
 
 Run `python -m ap_create_master --help` for full details.

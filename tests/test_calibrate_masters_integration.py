@@ -822,7 +822,12 @@ class TestPixInsightExecution:
         mock_subprocess.return_value = mock_result
 
         exit_code = run_pixinsight(
-            str(pixinsight_binary), str(script_path), instance_id=123, force_exit=True
+            str(pixinsight_binary),
+            str(script_path),
+            calibrated_files=[],
+            master_files=[],
+            instance_id=123,
+            force_exit=True,
         )
 
         assert exit_code == 0
@@ -852,7 +857,12 @@ class TestPixInsightExecution:
         mock_result.stdout = "Error: Something went wrong"
         mock_subprocess.return_value = mock_result
 
-        exit_code = run_pixinsight(str(pixinsight_binary), str(script_path))
+        exit_code = run_pixinsight(
+            str(pixinsight_binary),
+            str(script_path),
+            calibrated_files=[],
+            master_files=[],
+        )
 
         assert exit_code == 1
 
@@ -875,7 +885,11 @@ class TestPixInsightExecution:
         mock_subprocess.return_value = mock_result
 
         exit_code = run_pixinsight(
-            str(pixinsight_binary), str(script_path), force_exit=False
+            str(pixinsight_binary),
+            str(script_path),
+            calibrated_files=[],
+            master_files=[],
+            force_exit=False,
         )
 
         assert exit_code == 0
@@ -894,7 +908,12 @@ class TestPixInsightExecution:
         pixinsight_binary = tmp_path / "bin" / "PixInsight.exe"
 
         with pytest.raises(FileNotFoundError, match="PixInsight binary not found"):
-            run_pixinsight(str(pixinsight_binary), str(script_path))
+            run_pixinsight(
+                str(pixinsight_binary),
+                str(script_path),
+                calibrated_files=[],
+                master_files=[],
+            )
 
     def test_run_pixinsight_script_not_found(self, tmp_path):
         """Test error when script file doesn't exist."""
@@ -907,7 +926,12 @@ class TestPixInsightExecution:
         pixinsight_binary.write_text("fake binary")
 
         with pytest.raises(FileNotFoundError, match="Script not found"):
-            run_pixinsight(str(pixinsight_binary), str(script_path))
+            run_pixinsight(
+                str(pixinsight_binary),
+                str(script_path),
+                calibrated_files=[],
+                master_files=[],
+            )
 
     @patch("subprocess.run")
     def test_run_pixinsight_subprocess_exception(self, mock_subprocess, tmp_path):
@@ -925,4 +949,9 @@ class TestPixInsightExecution:
         mock_subprocess.side_effect = OSError("Permission denied")
 
         with pytest.raises(OSError, match="Permission denied"):
-            run_pixinsight(str(pixinsight_binary), str(script_path))
+            run_pixinsight(
+                str(pixinsight_binary),
+                str(script_path),
+                calibrated_files=[],
+                master_files=[],
+            )

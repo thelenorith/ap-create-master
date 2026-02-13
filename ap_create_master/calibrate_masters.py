@@ -8,6 +8,8 @@ import argparse
 import logging
 import subprocess
 import sys
+import threading
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -15,14 +17,146 @@ from typing import Any, Dict, List, Optional, Tuple
 import ap_common
 from ap_common.fits import update_xisf_headers
 from ap_common.logging_config import setup_logging
-from ap_common.progress import progress_iter
+from ap_common.progress import ProgressTracker
 
 from . import config
 from .grouping import group_files, get_group_metadata
 from .master_matching import find_matching_master_for_flat
 from .script_generator import generate_combined_script, generate_master_filename
 
-logger = logging.getLogger("ap_create_master.calibrate_masters")
+logger = logging.getLogger(__name__)
+
+
+POLLING_FREQUENCY_SECONDS = 1
+
+
+def get_expected_output_files(
+    master_dir: Path,
+    calibrated_base_dir: Path,
+    bias_groups: List[Tuple[Dict[str, Any], List[str]]],
+    dark_groups: List[Tuple[Dict[str, Any], List[str]]],
+    flat_groups: List[Tuple[Dict[str, Any], List[str], Optional[str], Optional[str]]],
+) -> Tuple[List[Path], List[Path]]:
+    """
+    Build lists of expected output files for progress monitoring.
+
+    Args:
+        master_dir: Directory where master files will be created
+        calibrated_base_dir: Base directory for calibrated files
+        bias_groups: List of (metadata, file_paths) for bias groups
+        dark_groups: List of (metadata, file_paths) for dark groups
+        flat_groups: List of (metadata, file_paths, master_bias, master_dark) for flat groups
+
+    Returns:
+        Tuple of (calibrated_files, master_files):
+        - calibrated_files: List of calibrated flat file paths (Phase 1)
+        - master_files: List of master file paths (Phase 2)
+    """
+    calibrated_files = []
+    master_files = []
+
+    # Phase 1: Calibrated flat files (if using masters)
+    for metadata, file_paths, master_bias, master_dark in flat_groups:
+        if master_bias or master_dark:
+            master_name = generate_master_filename(metadata, "flat")
+            calibrated_dir = calibrated_base_dir / "calibrated" / master_name
+            for file_path in file_paths:
+                file_stem = Path(file_path).stem
+                calibrated_files.append(calibrated_dir / f"{file_stem}_c.xisf")
+
+    # Phase 2: Master files (bias, dark, flat)
+    for metadata, _ in bias_groups:
+        master_name = generate_master_filename(metadata, "bias")
+        master_files.append(master_dir / f"{master_name}.xisf")
+
+    for metadata, _ in dark_groups:
+        master_name = generate_master_filename(metadata, "dark")
+        master_files.append(master_dir / f"{master_name}.xisf")
+
+    for metadata, _, _, _ in flat_groups:
+        master_name = generate_master_filename(metadata, "flat")
+        master_files.append(master_dir / f"{master_name}.xisf")
+
+    return calibrated_files, master_files
+
+
+def monitor_pixinsight_progress_two_phase(
+    calibrated_files: List[Path],
+    master_files: List[Path],
+    stop_event: threading.Event,
+    quiet: bool = False,
+) -> None:
+    """
+    Monitor PixInsight progress by polling for expected output files in two phases.
+
+    Phase 1: Monitor calibrated files (if any)
+    Phase 2: Monitor master files
+
+    Args:
+        calibrated_files: List of expected calibrated file paths (Phase 1)
+        master_files: List of expected master file paths (Phase 2)
+        stop_event: Event to signal monitoring should stop
+        quiet: Suppress progress output
+    """
+    # Phase 1: Calibration
+    if calibrated_files:
+        found_files = set()
+        tracker = ProgressTracker(
+            total=len(calibrated_files),
+            desc="Calibrating flats",
+            unit="files",
+            enabled=not quiet,
+        )
+        tracker.start()
+
+        while not stop_event.is_set():
+            # Check for new calibrated files
+            for file_path in calibrated_files:
+                if file_path not in found_files and file_path.exists():
+                    found_files.add(file_path)
+                    tracker.update(n=1)  # No status to avoid showing long filenames
+
+            # All calibration done, move to next phase
+            if len(found_files) >= len(calibrated_files):
+                break
+
+            time.sleep(POLLING_FREQUENCY_SECONDS)
+
+        # Final update to ensure 100%
+        if len(found_files) < len(calibrated_files):
+            tracker.update(n=len(calibrated_files) - len(found_files))
+
+        tracker.finish()
+
+    # Phase 2: Master creation
+    if master_files:
+        found_files = set()
+        tracker = ProgressTracker(
+            total=len(master_files),
+            desc="Creating masters",
+            unit="files",
+            enabled=not quiet,
+        )
+        tracker.start()
+
+        while not stop_event.is_set():
+            # Check for new master files
+            for file_path in master_files:
+                if file_path not in found_files and file_path.exists():
+                    found_files.add(file_path)
+                    tracker.update(n=1)  # No status to keep output clean
+
+            # All masters done
+            if len(found_files) >= len(master_files):
+                break
+
+            time.sleep(POLLING_FREQUENCY_SECONDS)
+
+        # Final update to ensure 100%
+        if len(found_files) < len(master_files):
+            tracker.update(n=len(master_files) - len(found_files))
+
+        tracker.finish()
 
 
 def write_master_imagetyp_headers(master_files: List[Tuple[str, str]]) -> None:
@@ -88,6 +222,7 @@ def generate_masters(
     timestamp: Optional[str] = None,
     debug: bool = False,
     dryrun: bool = False,
+    quiet: bool = False,
 ) -> Tuple[List[str], List[Tuple[str, str]]]:
     """
     Generate calibration masters from input directory.
@@ -101,6 +236,7 @@ def generate_masters(
         timestamp: Timestamp string for script filename (default: current time)
         debug: Enable debug output
         dryrun: Show what would be done without writing scripts
+        quiet: Suppress progress output
 
     Returns:
         Tuple of (script_paths, master_files):
@@ -122,7 +258,7 @@ def generate_masters(
     script_dir.mkdir(parents=True, exist_ok=True)
 
     # Discover files using ap-common get_filtered_metadata
-    print(f"Discovering calibration files in: {input_dir}")
+    logger.info(f"Discovering calibration files in: {input_dir}")
 
     # Get files for each type using get_filtered_metadata
     files_by_type = {}
@@ -135,8 +271,8 @@ def generate_masters(
                 patterns=[r".*\.fits$", r".*\.fit$"],
                 recursive=True,
                 required_properties=config.REQUIRED_KEYWORDS[frame_type],
-                debug=False,
-                printStatus=False,
+                debug=debug,
+                printStatus=not quiet,
             )
             # Convert to list format expected by group_files
             files_by_type[frame_type] = [
@@ -144,13 +280,12 @@ def generate_masters(
                 for filename, headers in metadata.items()
             ]
         except Exception as e:
-            print(f"Warning: Failed to discover {frame_type} files: {e}")
+            logger.warning(f"Failed to discover {frame_type} files: {e}")
             files_by_type[frame_type] = []
 
-    print("Found files:")
-    print(f"  Bias: {len(files_by_type['bias'])}")
-    print(f"  Dark: {len(files_by_type['dark'])}")
-    print(f"  Flat: {len(files_by_type['flat'])}")
+    logger.debug(
+        f"Found files: Bias: {len(files_by_type['bias'])}, Dark: {len(files_by_type['dark'])}, Flat: {len(files_by_type['flat'])}"
+    )
 
     # Collect all groups for combined script
     bias_groups_list = []
@@ -162,7 +297,6 @@ def generate_masters(
 
     # Process bias frames
     if files_by_type["bias"]:
-        print("\nProcessing bias frames...")
         bias_groups = group_files(files_by_type["bias"], "bias")
 
         for group_key, group_files_list in bias_groups.items():
@@ -175,11 +309,12 @@ def generate_masters(
             master_file_path = str(master_dir / f"{master_name}.xisf")
             master_files_list.append((master_file_path, "bias"))
 
-            print(f"  Group: {len(file_paths)} files")
+            logger.debug(f"Bias group: {len(file_paths)} files -> {master_name}")
+
+        logger.debug(f"\nProcessing {len(bias_groups_list)} bias group(s)")
 
     # Process dark frames
     if files_by_type["dark"]:
-        print("\nProcessing dark frames...")
         dark_groups = group_files(files_by_type["dark"], "dark")
 
         for group_key, group_files_list in dark_groups.items():
@@ -192,12 +327,14 @@ def generate_masters(
             master_file_path = str(master_dir / f"{master_name}.xisf")
             master_files_list.append((master_file_path, "dark"))
 
-            print(f"  Group: {len(file_paths)} files")
+            logger.debug(f"Dark group: {len(file_paths)} files -> {master_name}")
+
+        logger.debug(f"\nProcessing {len(dark_groups_list)} dark group(s)")
 
     # Process flat frames
     if files_by_type["flat"]:
-        print("\nProcessing flat frames...")
         flat_groups = group_files(files_by_type["flat"], "flat")
+        n_calibrated = 0
 
         for group_key, group_files_list in flat_groups.items():
             first_file = group_files_list[0]
@@ -220,13 +357,11 @@ def generate_masters(
                         pass
 
             if bias_master_dir:
-                logger.debug("Looking for bias master for group...")
                 master_bias_xisf = find_matching_master_for_flat(
                     bias_master_dir, first_file["headers"], "bias"
                 )
 
             if dark_master_dir:
-                logger.debug("Looking for dark master for group...")
                 master_dark_xisf = find_matching_master_for_flat(
                     dark_master_dir,
                     first_file["headers"],
@@ -243,18 +378,29 @@ def generate_masters(
             master_file_path = str(master_dir / f"{master_name}.xisf")
             master_files_list.append((master_file_path, "flat"))
 
-            print(f"  Group: {len(file_paths)} files")
+            # Count calibrated groups
+            if master_bias_xisf or master_dark_xisf:
+                n_calibrated += 1
+
+            # Log details at debug level
+            logger.debug(f"Flat group: {len(file_paths)} files -> {master_name}")
             if master_bias_xisf:
-                print(f"    Using bias master: {Path(master_bias_xisf).name}")
+                logger.debug(f"  Using bias master: {Path(master_bias_xisf).name}")
             if master_dark_xisf:
-                print(f"    Using dark master: {Path(master_dark_xisf).name}")
+                logger.debug(f"  Using dark master: {Path(master_dark_xisf).name}")
+
+        if not quiet:
+            if n_calibrated > 0:
+                logger.debug(
+                    f"\nProcessing {len(flat_groups_list)} flat group(s) ({n_calibrated} with calibration)"
+                )
+            else:
+                logger.debug(f"\nProcessing {len(flat_groups_list)} flat group(s)")
 
     # Generate single combined script
     if bias_groups_list or dark_groups_list or flat_groups_list:
         if dryrun:
             print("\n[DRYRUN] Would generate combined script...")
-        else:
-            print("\nGenerating combined script...")
 
         # Create calibrated directories for flat groups (if using masters)
         if flat_groups_list and not dryrun:
@@ -296,7 +442,7 @@ def generate_masters(
             )
 
             script_path.write_text(combined_script, encoding="utf-8")
-            logger.info(
+            logger.debug(
                 f"Generated script: {script_path.name}, console_log: {log_file_path.name}"
             )
             return ([str(script_path)], master_files_list)
@@ -307,8 +453,12 @@ def generate_masters(
 def run_pixinsight(
     pixinsight_binary: str,
     script_path: str,
+    calibrated_files: List[Path],
+    master_files: List[Path],
     instance_id: int = 123,
     force_exit: bool = True,
+    quiet: bool = False,
+    debug: bool = False,
 ) -> int:
     """
     Execute PixInsight with the generated script.
@@ -316,8 +466,12 @@ def run_pixinsight(
     Args:
         pixinsight_binary: Path to PixInsight binary/executable
         script_path: Path to the JavaScript script to execute
+        calibrated_files: List of expected calibrated files (Phase 1)
+        master_files: List of expected master files (Phase 2)
         instance_id: PixInsight instance ID (default: 123)
         force_exit: Exit PixInsight after script completes (default: True)
+        quiet: Suppress progress output
+        debug: Show debug output including PixInsight stderr
 
     Returns:
         Exit code from PixInsight process
@@ -337,7 +491,7 @@ def run_pixinsight(
         / f"{script_path_obj.stem.replace('_calibrate_masters', '')}.log"
     )
 
-    logger.info(
+    logger.debug(
         f"Executing PixInsight: binary={pixinsight_binary_obj}, script={script_path_obj}, "
         f"console_log={log_file}, instance_id={instance_id}, automation_mode=enabled"
     )
@@ -354,9 +508,18 @@ def run_pixinsight(
 
     if force_exit:
         cmd.append("--force-exit")
-        logger.info("Force exit: enabled")
+        logger.debug("Force exit: enabled")
 
-    logger.info(f"Running: {' '.join(cmd)}")
+    logger.debug(f"Running: {' '.join(cmd)}")
+
+    # Start two-phase progress monitoring in background thread
+    stop_event = threading.Event()
+    monitor_thread = threading.Thread(
+        target=monitor_pixinsight_progress_two_phase,
+        args=(calibrated_files, master_files, stop_event, quiet),
+        daemon=True,
+    )
+    monitor_thread.start()
 
     # Execute and wait for completion
     # Console output is logged by PixInsight via Console.beginLog() in the script
@@ -364,19 +527,22 @@ def run_pixinsight(
         result = subprocess.run(
             cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
+            stderr=subprocess.DEVNULL if not debug else subprocess.STDOUT,
             check=False,
             text=True,
         )
 
-        # Log any stderr/stdout from the process itself (e.g., GPU warnings)
-        if result.stdout:
-            logger.info(result.stdout)
+        # Log any stderr/stdout from the process itself (e.g., GPU warnings) in debug mode
+        if result.stdout and debug:
+            logger.debug(result.stdout)
 
         return result.returncode
     except Exception as e:
         logger.error(f"Failed to execute PixInsight: {e}")
         raise
+    finally:
+        stop_event.set()
+        monitor_thread.join(timeout=5)
 
 
 def main() -> int:
@@ -459,15 +625,15 @@ def main() -> int:
             timestamp,
             debug=args.debug,
             dryrun=args.dryrun,
+            quiet=args.quiet,
         )
 
         if args.dryrun:
             # Dryrun mode: no scripts were written
             print("\n[DRYRUN] Completed. No scripts written, no execution performed.")
         elif scripts:
-            print(f"Generated combined script: {Path(scripts[0]).name}")
-            print(f"Script location: {Path(scripts[0]).parent}")
-            print(f"Masters will be output to: {args.output_dir}")
+            if not args.quiet:
+                print(f"\nGenerated script: {Path(scripts[0]).name}")
 
             # Execute PixInsight if requested
             if not args.script_only:
@@ -481,26 +647,130 @@ def main() -> int:
                     print("Use --script-only or --dryrun to skip execution")
                     return 1
 
+                # Calculate expected output files for progress monitoring
+                # Re-run group generation to get the lists we need
+                output_path = Path(args.output_dir)
+                master_dir = output_path / "master"
+
+                # Get files by type (same as in generate_masters)
+                files_by_type = {}
+                for frame_type in ["bias", "dark", "flat"]:
+                    try:
+                        metadata = ap_common.get_filtered_metadata(
+                            dirs=[args.input_dir],
+                            filters={config.NORMALIZED_HEADER_TYPE: frame_type.upper()},
+                            profileFromPath=False,
+                            patterns=[r".*\.fits$", r".*\.fit$"],
+                            recursive=True,
+                            required_properties=config.REQUIRED_KEYWORDS[frame_type],
+                            debug=False,
+                            printStatus=False,
+                        )
+                        files_by_type[frame_type] = [
+                            {"path": filename, "headers": headers}
+                            for filename, headers in metadata.items()
+                        ]
+                    except Exception:
+                        files_by_type[frame_type] = []
+
+                # Build group lists to calculate expected files
+                from .grouping import group_files, get_group_metadata
+                from .master_matching import find_matching_master_for_flat
+
+                bias_groups_list = []
+                dark_groups_list = []
+                flat_groups_list = []
+
+                if files_by_type["bias"]:
+                    bias_groups = group_files(files_by_type["bias"], "bias")
+                    for _, group_files_list in bias_groups.items():
+                        metadata = get_group_metadata(
+                            group_files_list[0]["headers"], "bias"
+                        )
+                        file_paths = [f["path"] for f in group_files_list]
+                        bias_groups_list.append((metadata, file_paths))
+
+                if files_by_type["dark"]:
+                    dark_groups = group_files(files_by_type["dark"], "dark")
+                    for _, group_files_list in dark_groups.items():
+                        metadata = get_group_metadata(
+                            group_files_list[0]["headers"], "dark"
+                        )
+                        file_paths = [f["path"] for f in group_files_list]
+                        dark_groups_list.append((metadata, file_paths))
+
+                if files_by_type["flat"]:
+                    flat_groups = group_files(files_by_type["flat"], "flat")
+                    for _, group_files_list in flat_groups.items():
+                        first_file = group_files_list[0]
+                        metadata = get_group_metadata(first_file["headers"], "flat")
+                        file_paths = [f["path"] for f in group_files_list]
+
+                        master_bias_xisf = None
+                        master_dark_xisf = None
+
+                        flat_exposure_times = []
+                        for file_info in group_files_list:
+                            headers = file_info["headers"]
+                            exposure = headers.get(
+                                config.NORMALIZED_HEADER_EXPOSURESECONDS
+                            )
+                            if exposure is not None:
+                                try:
+                                    flat_exposure_times.append(float(exposure))
+                                except (ValueError, TypeError):
+                                    pass
+
+                        if args.bias_master_dir:
+                            master_bias_xisf = find_matching_master_for_flat(
+                                args.bias_master_dir, first_file["headers"], "bias"
+                            )
+
+                        if args.dark_master_dir:
+                            master_dark_xisf = find_matching_master_for_flat(
+                                args.dark_master_dir,
+                                first_file["headers"],
+                                "dark",
+                                flat_exposure_times if flat_exposure_times else None,
+                            )
+
+                        flat_groups_list.append(
+                            (metadata, file_paths, master_bias_xisf, master_dark_xisf)
+                        )
+
+                calibrated_files, master_files_list = get_expected_output_files(
+                    master_dir,
+                    output_path,
+                    bias_groups_list,
+                    dark_groups_list,
+                    flat_groups_list,
+                )
+
                 exit_code = run_pixinsight(
                     args.pixinsight_binary,
                     scripts[0],
+                    calibrated_files,
+                    master_files_list,
                     args.instance_id,
                     not args.no_force_exit,
+                    args.quiet,
+                    args.debug,
                 )
 
                 if exit_code == 0:
-                    print("PixInsight execution completed successfully!")
+                    if not args.quiet:
+                        print("\nPixInsight execution completed successfully!")
 
                     # Write IMAGETYP headers to generated master files
                     if master_files:
-                        logger.info("Writing IMAGETYP headers to master files...")
+                        logger.debug("Writing IMAGETYP headers to master files...")
                         write_master_imagetyp_headers(master_files)
-                        logger.info(
-                            f"Updated {len(master_files)} master file(s) with IMAGETYP headers"
-                        )
+                        if not args.quiet:
+                            print(f"Updated {len(master_files)} master file(s)")
 
-                    print(f"Master files: {args.output_dir}/master")
-                    print(f"Logs: {args.output_dir}/logs")
+                    if not args.quiet:
+                        print(f"Master files: {args.output_dir}/master")
+                        print(f"Logs: {args.output_dir}/logs")
                 else:
                     logger.warning(f"PixInsight exited with code {exit_code}")
                     print(f"WARNING: PixInsight exited with code {exit_code}")

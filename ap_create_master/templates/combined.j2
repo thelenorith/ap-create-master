@@ -12,28 +12,49 @@ console.show();
 console.writeln("Starting calibration master generation...");
 console.flush();
 
+{% if flat_groups %}
+// ===== PHASE 1: Calibrating Flat Frames =====
+{% set calibration_needed = namespace(found=false) %}
+{% for group in flat_groups %}
+{% if group.master_bias_enabled or group.master_dark_enabled %}
+{% set calibration_needed.found = true %}
+{% endif %}
+{% endfor %}
+{% if calibration_needed.found %}
+console.writeln("\n===== Phase 1: Calibrating Flat Frames =====");
+console.flush();
+{% for group in flat_groups %}
+{% if group.master_bias_enabled or group.master_dark_enabled %}
+{% include 'ImageCalibration_flat.j2' %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+// ===== PHASE 2: Creating Master Frames =====
+console.writeln("\n===== Phase 2: Creating Master Frames =====");
+console.flush();
+
 {% if bias_groups %}
-// ===== Processing Bias Frames =====
+console.writeln("Processing Bias Frames...");
+console.flush();
 {% for group in bias_groups %}
 {% include 'ImageIntegration_bias.j2' %}
 {% endfor %}
 {% endif %}
 
 {% if dark_groups %}
-// ===== Processing Dark Frames =====
+console.writeln("Processing Dark Frames...");
+console.flush();
 {% for group in dark_groups %}
 {% include 'ImageIntegration_dark.j2' %}
 {% endfor %}
 {% endif %}
 
 {% if flat_groups %}
-// ===== Processing Flat Frames =====
+console.writeln("Processing Flat Frames...");
+console.flush();
 {% for group in flat_groups %}
-{% if group.master_bias_enabled or group.master_dark_enabled %}
-// ===== Flats: Calibration Phase =====
-{% include 'ImageCalibration_flat.j2' %}
-{% endif %}
-// ===== Flats: Integration Phase =====
 {% include 'ImageIntegration_flat.j2' %}
 {% endfor %}
 {% endif %}
