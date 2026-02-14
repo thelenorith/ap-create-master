@@ -26,6 +26,8 @@ from .script_generator import generate_combined_script, generate_master_filename
 
 logger = logging.getLogger(__name__)
 
+EXIT_SUCCESS = 0
+EXIT_ERROR = 1
 
 POLLING_FREQUENCY_SECONDS = 1
 
@@ -672,7 +674,7 @@ def main() -> int:
                         "ERROR: --pixinsight-binary is required to execute PixInsight"
                     )
                     print("Use --script-only or --dryrun to skip execution")
-                    return 1
+                    return EXIT_ERROR
 
                 # Calculate expected output files for progress monitoring
                 # Re-run group generation to get the lists we need
@@ -815,14 +817,14 @@ def main() -> int:
         else:
             print("No calibration frames found to process.")
 
-        return 0
+        return EXIT_SUCCESS
     except Exception as e:
         logger.error(f"Error: {e}")
         print(f"ERROR: {e}", file=sys.stderr)
         import traceback
 
         traceback.print_exc()
-        return 1
+        return EXIT_ERROR
 
 
 if __name__ == "__main__":
