@@ -30,7 +30,8 @@ logger = logging.getLogger(__name__)
 POLLING_FREQUENCY_SECONDS = 1
 
 # Set default description width for aligned progress bars
-# Aligns: "Loading metadata", "Enriching metadata", "Calibrating flats", "Creating masters"
+# Aligns: "Loading metadata", "Enriching metadata",
+# "Calibrating flats", "Creating masters"
 ProgressTracker.set_default_desc_width(20)
 
 
@@ -49,7 +50,8 @@ def get_expected_output_files(
         calibrated_base_dir: Base directory for calibrated files
         bias_groups: List of (metadata, file_paths) for bias groups
         dark_groups: List of (metadata, file_paths) for dark groups
-        flat_groups: List of (metadata, file_paths, master_bias, master_dark) for flat groups
+        flat_groups: List of (metadata, file_paths, master_bias,
+            master_dark) for flat groups
 
     Returns:
         Tuple of (calibrated_files, master_files):
@@ -288,7 +290,9 @@ def generate_masters(
             files_by_type[frame_type] = []
 
     logger.debug(
-        f"Found files: Bias: {len(files_by_type['bias'])}, Dark: {len(files_by_type['dark'])}, Flat: {len(files_by_type['flat'])}"
+        f"Found files: Bias: {len(files_by_type['bias'])}, "
+        f"Dark: {len(files_by_type['dark'])}, "
+        f"Flat: {len(files_by_type['flat'])}"
     )
 
     # Collect all groups for combined script
@@ -396,7 +400,9 @@ def generate_masters(
         if not quiet:
             if n_calibrated > 0:
                 logger.debug(
-                    f"\nProcessing {len(flat_groups_list)} flat group(s) ({n_calibrated} with calibration)"
+                    f"\nProcessing {len(flat_groups_list)} "
+                    f"flat group(s) ({n_calibrated} "
+                    f"with calibration)"
                 )
             else:
                 logger.debug(f"\nProcessing {len(flat_groups_list)} flat group(s)")
@@ -432,7 +438,10 @@ def generate_masters(
             print(f"[DRYRUN] Would write script to: {script_path}")
             print(f"[DRYRUN] Would log to: {log_file_path}")
             print(
-                f"[DRYRUN] Summary: {len(bias_groups_list)} bias, {len(dark_groups_list)} dark, {len(flat_groups_list)} flat groups"
+                f"[DRYRUN] Summary: "
+                f"{len(bias_groups_list)} bias, "
+                f"{len(dark_groups_list)} dark, "
+                f"{len(flat_groups_list)} flat groups"
             )
             return ([], master_files_list)
         else:
@@ -447,7 +456,8 @@ def generate_masters(
 
             script_path.write_text(combined_script, encoding="utf-8")
             logger.debug(
-                f"Generated script: {script_path.name}, console_log: {log_file_path.name}"
+                f"Generated script: {script_path.name}, "
+                f"console_log: {log_file_path.name}"
             )
             return ([str(script_path)], master_files_list)
 
@@ -496,11 +506,16 @@ def run_pixinsight(
     )
 
     logger.debug(
-        f"Executing PixInsight: binary={pixinsight_binary_obj}, script={script_path_obj}, "
-        f"console_log={log_file}, instance_id={instance_id}, automation_mode=enabled"
+        f"Executing PixInsight: "
+        f"binary={pixinsight_binary_obj}, "
+        f"script={script_path_obj}, "
+        f"console_log={log_file}, "
+        f"instance_id={instance_id}, "
+        f"automation_mode=enabled"
     )
 
-    # Build command: PixInsight --automation-mode -n=<instance_id> -r=<script_path> --force-exit
+    # Build command: PixInsight --automation-mode
+    # -n=<instance_id> -r=<script_path> --force-exit
     # Note: PixInsight requires equals sign format, not space-separated arguments
     # --automation-mode prevents interactive dialogs and GUI messages
     cmd = [
@@ -526,7 +541,8 @@ def run_pixinsight(
     monitor_thread.start()
 
     # Execute and wait for completion
-    # Console output is logged by PixInsight via Console.beginLog() in the script
+    # Console output is logged by PixInsight via
+    # Console.beginLog() in the script
     try:
         result = subprocess.run(
             cmd,
@@ -536,7 +552,8 @@ def run_pixinsight(
             text=True,
         )
 
-        # Log any stderr/stdout from the process itself (e.g., GPU warnings) in debug mode
+        # Log any stderr/stdout from the process itself
+        # (e.g., GPU warnings) in debug mode
         if result.stdout and debug:
             logger.debug(result.stdout)
 
@@ -572,7 +589,10 @@ def main() -> int:
     )
     parser.add_argument(
         "--script-dir",
-        help="Directory for generated PixInsight scripts and logs (default: output_dir/logs)",
+        help=(
+            "Directory for generated PixInsight scripts"
+            " and logs (default: output_dir/logs)"
+        ),
     )
     parser.add_argument(
         "--pixinsight-binary",
@@ -587,7 +607,10 @@ def main() -> int:
     parser.add_argument(
         "--no-force-exit",
         action="store_true",
-        help="Don't exit PixInsight after script completes (default: exit automatically)",
+        help=(
+            "Don't exit PixInsight after script"
+            " completes (default: exit automatically)"
+        ),
     )
     parser.add_argument(
         "--script-only",
@@ -781,8 +804,13 @@ def main() -> int:
                     return exit_code
             else:
                 print("Script-only mode: PixInsight execution skipped")
+                binary = args.pixinsight_binary or "<pixinsight-binary>"
                 print(
-                    f"To execute: {args.pixinsight_binary or '<pixinsight-binary>'} --automation-mode -n={args.instance_id} -r={scripts[0]} --force-exit"
+                    f"To execute: {binary}"
+                    f" --automation-mode"
+                    f" -n={args.instance_id}"
+                    f" -r={scripts[0]}"
+                    f" --force-exit"
                 )
         else:
             print("No calibration frames found to process.")

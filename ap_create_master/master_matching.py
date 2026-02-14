@@ -39,7 +39,8 @@ def find_matching_master_for_flat(
         master_dir: Directory containing master files
         flat_headers: FITS headers from a flat frame (or representative flat from group)
         master_type: "bias" or "dark"
-        flat_exposure_times: List of exposure times for all flats in the group (for dark matching)
+        flat_exposure_times: List of exposure times for all
+            flats in the group (for dark matching)
                              If None, uses EXPOSURE/EXPTIME from flat_headers
 
     Returns:
@@ -64,7 +65,8 @@ def find_matching_master_for_flat(
 
     logger.debug(f"Filters: {filters}")
 
-    # Build required_properties list (TYPE + instrument settings + EXPOSURESECONDS for darks)
+    # Build required_properties list
+    # (TYPE + instrument settings + EXPOSURESECONDS for darks)
     required_properties = [config.NORMALIZED_HEADER_TYPE] + list(
         config.MASTER_MATCH_KEYWORDS
     )
@@ -131,7 +133,8 @@ def _find_best_dark_match(
         # Use minimum exposure time from the group (prefer scaling up)
         target_exposure = min(flat_exposure_times)
         logger.debug(
-            f"Target exposure: {target_exposure}s (min of flat group: {flat_exposure_times})"
+            f"Target exposure: {target_exposure}s "
+            f"(min of flat group: {flat_exposure_times})"
         )
     else:
         # Use exposure from headers
@@ -188,7 +191,8 @@ def _find_best_dark_match(
             dark_candidates, key=lambda d: abs(d["exposure"] - target_exposure)
         )
         logger.debug(
-            f"Selected dark with {best_dark['exposure']}s (closest > target, will scale down)"
+            f"Selected dark with {best_dark['exposure']}s "
+            f"(closest > target, will scale down)"
         )
         logger.debug(f"Using: {Path(best_dark['path']).name}")
         return best_dark["path"]
