@@ -99,9 +99,11 @@ def generate_combined_script(
         master_output_dir: Output directory for master files
         bias_groups: List of (metadata, file_paths) tuples for bias groups
         dark_groups: List of (metadata, file_paths) tuples for dark groups
-        flat_groups: List of (metadata, file_paths, master_bias_xisf, master_dark_xisf) tuples for flat groups
+        flat_groups: List of (metadata, file_paths,
+            master_bias_xisf, master_dark_xisf) tuples
         log_file: Path to log file for Console.beginLog()
-        calibrated_base_dir: Base directory for calibrated flat frames (default: same as master_output_dir)
+        calibrated_base_dir: Base directory for calibrated flat
+            frames (default: same as master_output_dir)
 
     Returns:
         Combined JavaScript code as string
