@@ -21,6 +21,7 @@ from ap_common.constants import (
     TYPE_BIAS,
     TYPE_DARK,
     TYPE_FLAT,
+    TYPE_LIGHT,
 )
 
 # Frame type list for processing
@@ -71,7 +72,7 @@ MASTER_MATCH_KEYWORDS = [
 ]
 
 # Frame types to ignore (e.g., lights)
-IGNORED_TYPES = ["light"]
+IGNORED_TYPES = [TYPE_LIGHT.lower()]
 
 # PixInsight ImageIntegration imageType constants
 IMAGE_TYPE_BIAS = 1

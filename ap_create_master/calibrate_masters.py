@@ -15,6 +15,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import ap_common
+from ap_common.constants import (
+    DEFAULT_FITS_PATTERN,
+    HEADER_IMAGETYP,
+    TYPE_MASTER_BIAS,
+    TYPE_MASTER_DARK,
+    TYPE_MASTER_FLAT,
+)
 from ap_common.fits import update_xisf_headers
 from ap_common.logging_config import setup_logging
 from ap_common.progress import ProgressTracker
@@ -183,9 +190,9 @@ def write_master_imagetyp_headers(master_files: List[Tuple[str, str]]) -> None:
                      frame_type is "bias", "dark", or "flat"
     """
     type_mapping = {
-        "bias": "MASTER BIAS",
-        "dark": "MASTER DARK",
-        "flat": "MASTER FLAT",
+        "bias": TYPE_MASTER_BIAS,
+        "dark": TYPE_MASTER_DARK,
+        "flat": TYPE_MASTER_FLAT,
     }
 
     for master_file, frame_type in master_files:
@@ -205,7 +212,7 @@ def write_master_imagetyp_headers(master_files: List[Tuple[str, str]]) -> None:
             # Get denormalized header name (should be "IMAGETYP")
             header_key = ap_common.denormalize_header(config.NORMALIZED_HEADER_TYPE)
             if not header_key:
-                header_key = "IMAGETYP"  # Fallback
+                header_key = HEADER_IMAGETYP  # Fallback
 
             # Update IMAGETYP header using ap-common
             update_xisf_headers(
@@ -276,7 +283,7 @@ def generate_masters(
                 dirs=[input_dir],
                 filters={config.NORMALIZED_HEADER_TYPE: frame_type.upper()},
                 profileFromPath=False,
-                patterns=[r".*\.fits$", r".*\.fit$"],
+                patterns=[DEFAULT_FITS_PATTERN],
                 recursive=True,
                 required_properties=config.REQUIRED_KEYWORDS[frame_type],
                 debug=debug,
@@ -689,7 +696,7 @@ def main() -> int:
                             dirs=[args.input_dir],
                             filters={config.NORMALIZED_HEADER_TYPE: frame_type.upper()},
                             profileFromPath=False,
-                            patterns=[r".*\.fits$", r".*\.fit$"],
+                            patterns=[DEFAULT_FITS_PATTERN],
                             recursive=True,
                             required_properties=config.REQUIRED_KEYWORDS[frame_type],
                             debug=False,
