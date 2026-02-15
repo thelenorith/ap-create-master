@@ -1,12 +1,7 @@
 # ap-create-master
 
-[![Test](https://github.com/jewzaam/ap-create-master/actions/workflows/test.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/test.yml)
-[![Coverage](https://github.com/jewzaam/ap-create-master/actions/workflows/coverage.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/coverage.yml)
-[![Lint](https://github.com/jewzaam/ap-create-master/actions/workflows/lint.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/lint.yml)
-[![Format](https://github.com/jewzaam/ap-create-master/actions/workflows/format.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/format.yml)
-[![Typecheck](https://github.com/jewzaam/ap-create-master/actions/workflows/typecheck.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/typecheck.yml)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Test](https://github.com/jewzaam/ap-create-master/actions/workflows/test.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/test.yml) [![Coverage](https://github.com/jewzaam/ap-create-master/actions/workflows/coverage.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/coverage.yml) [![Lint](https://github.com/jewzaam/ap-create-master/actions/workflows/lint.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/lint.yml) [![Format](https://github.com/jewzaam/ap-create-master/actions/workflows/format.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/format.yml) [![Type Check](https://github.com/jewzaam/ap-create-master/actions/workflows/typecheck.yml/badge.svg)](https://github.com/jewzaam/ap-create-master/actions/workflows/typecheck.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Automated generation of master bias, dark, and flat calibration frames for PixInsight.
 
@@ -104,7 +99,7 @@ output_dir/
 ```
 
 Masters are named with metadata for traceability:
-- `masterBias_INSTRUME_<camera>_SET-TEMP_<temp>_GAIN_<gain>_OFFSET_<offset>_READOUTM_<mode>.xisf`
+- `masterBias_INSTRUME_<camera>_SETTEMP_<temp>_GAIN_<gain>_OFFSET_<offset>_READOUTM_<mode>.xisf`
 - `masterDark_<above>_EXPOSURE_<seconds>.xisf`
 - `masterFlat_<above>_DATE-OBS_<date>_FILTER_<filter>.xisf`
 
@@ -120,7 +115,7 @@ Frames must have proper FITS keywords:
 - `SET-TEMP` or `SETTEMP`: Sensor temperature
 - `GAIN`: Gain setting
 - `OFFSET`: Offset setting
-- `READOUTM`: Readout mode
+- `READOUTMODE` or `READOUTM`: Readout mode
 - `EXPOSURE` or `EXPTIME`: Exposure time (for darks/flats)
 - `DATE-OBS`: Observation date (for flats)
 - `FILTER`: Filter name (for flats)
@@ -191,27 +186,9 @@ When searching for bias/dark masters in library directories:
 
 **No matching master found for flat calibration:**
 - Check that bias/dark masters have matching instrument settings in their FITS headers
-- Masters must match: `INSTRUME`, `SET-TEMP`, `GAIN`, `OFFSET`, `READOUTM`
+- Masters must match: `INSTRUME`, `SETTEMP`, `GAIN`, `OFFSET`, `READOUTM`
 - Date and filter differences are expected
 
 **PixInsight execution fails:**
 - Check the generated script at `<output_dir>/logs/<timestamp>_calibrate_masters.js`
 - Review the execution log at `<output_dir>/logs/<timestamp>.log`
-
-## Development
-
-Run tests:
-```bash
-pytest tests/
-```
-
-Run with coverage:
-```bash
-pytest tests/ --cov=ap_create_master
-```
-
-Format code:
-```bash
-black ap_create_master/ tests/
-ruff check ap_create_master/ tests/
-```
