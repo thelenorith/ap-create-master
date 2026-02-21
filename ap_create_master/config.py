@@ -74,6 +74,9 @@ MASTER_MATCH_KEYWORDS = [
 # Frame types to ignore (e.g., lights)
 IGNORED_TYPES = [TYPE_LIGHT.lower()]
 
+# PixInsight ImageIntegration requires at least 3 source images
+MIN_IMAGES_FOR_INTEGRATION = 3
+
 # PixInsight ImageIntegration imageType constants
 IMAGE_TYPE_BIAS = 1
 IMAGE_TYPE_DARK = 2

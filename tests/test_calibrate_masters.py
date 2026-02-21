@@ -41,37 +41,28 @@ class TestGenerateMasters:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+
         # Mock file discovery
         mock_get_filtered.return_value = {
-            "bias1.fits": {
-                config.NORMALIZED_HEADER_TYPE: "bias",
-                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
-                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
-                config.NORMALIZED_HEADER_GAIN: "239",
-                config.NORMALIZED_HEADER_OFFSET: "150",
-                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
-            },
-            "bias2.fits": {
-                config.NORMALIZED_HEADER_TYPE: "bias",
-                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
-                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
-                config.NORMALIZED_HEADER_GAIN: "239",
-                config.NORMALIZED_HEADER_OFFSET: "150",
-                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
-            },
+            "bias1.fits": bias_headers,
+            "bias2.fits": bias_headers,
+            "bias3.fits": bias_headers,
         }
 
         # Mock grouping
         mock_group_files.return_value = {
             ("bias", "ATR585M", "-10.00", "239", "150", "Low Conversion Gain"): [
-                {
-                    "path": "bias1.fits",
-                    "headers": mock_get_filtered.return_value["bias1.fits"],
-                },
-                {
-                    "path": "bias2.fits",
-                    "headers": mock_get_filtered.return_value["bias2.fits"],
-                },
+                {"path": "bias1.fits", "headers": bias_headers},
+                {"path": "bias2.fits", "headers": bias_headers},
+                {"path": "bias3.fits", "headers": bias_headers},
             ]
         }
 
@@ -141,19 +132,23 @@ class TestGenerateMasters:
         dark_master_dir = str(tmp_path / "dark_masters")
         os.makedirs(input_dir, exist_ok=True)
 
+        flat_headers = {
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
+        }
+
         # Mock flat file discovery
         mock_get_filtered.return_value = {
-            "flat1.fits": {
-                config.NORMALIZED_HEADER_TYPE: "flat",
-                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
-                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
-                config.NORMALIZED_HEADER_GAIN: "239",
-                config.NORMALIZED_HEADER_OFFSET: "150",
-                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
-                config.NORMALIZED_HEADER_DATE: "2026-01-15",
-                config.NORMALIZED_HEADER_FILTER: "B",
-                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
-            }
+            "flat1.fits": flat_headers,
+            "flat2.fits": flat_headers,
+            "flat3.fits": flat_headers,
         }
 
         # Mock grouping
@@ -168,10 +163,9 @@ class TestGenerateMasters:
                 "2026-01-15",
                 "B",
             ): [
-                {
-                    "path": "flat1.fits",
-                    "headers": mock_get_filtered.return_value["flat1.fits"],
-                }
+                {"path": "flat1.fits", "headers": flat_headers},
+                {"path": "flat2.fits", "headers": flat_headers},
+                {"path": "flat3.fits", "headers": flat_headers},
             ]
         }
 
@@ -221,23 +215,26 @@ class TestGenerateMasters:
         custom_script_dir = str(tmp_path / "custom_scripts")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+
         mock_get_filtered.return_value = {
-            "bias1.fits": {
-                config.NORMALIZED_HEADER_TYPE: "bias",
-                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
-                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
-                config.NORMALIZED_HEADER_GAIN: "239",
-                config.NORMALIZED_HEADER_OFFSET: "150",
-                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
-            }
+            "bias1.fits": bias_headers,
+            "bias2.fits": bias_headers,
+            "bias3.fits": bias_headers,
         }
 
         mock_group_files.return_value = {
             ("bias", "ATR585M", "-10.00", "239", "150", "Low Conversion Gain"): [
-                {
-                    "path": "bias1.fits",
-                    "headers": mock_get_filtered.return_value["bias1.fits"],
-                }
+                {"path": "bias1.fits", "headers": bias_headers},
+                {"path": "bias2.fits", "headers": bias_headers},
+                {"path": "bias3.fits", "headers": bias_headers},
             ]
         }
 
@@ -313,30 +310,34 @@ class TestGenerateMasters:
         dark_master_dir = str(tmp_path / "dark_masters")
         os.makedirs(input_dir, exist_ok=True)
 
+        flat_headers_invalid = {
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "invalid",  # Non-numeric
+        }
+        flat_headers_valid = {
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",  # Valid
+        }
+
         # Flat with invalid exposure time (non-numeric string)
         mock_get_filtered.return_value = {
-            "flat1.fits": {
-                config.NORMALIZED_HEADER_TYPE: "flat",
-                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
-                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
-                config.NORMALIZED_HEADER_GAIN: "239",
-                config.NORMALIZED_HEADER_OFFSET: "150",
-                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
-                config.NORMALIZED_HEADER_DATE: "2026-01-15",
-                config.NORMALIZED_HEADER_FILTER: "B",
-                config.NORMALIZED_HEADER_EXPOSURESECONDS: "invalid",  # Non-numeric
-            },
-            "flat2.fits": {
-                config.NORMALIZED_HEADER_TYPE: "flat",
-                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
-                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
-                config.NORMALIZED_HEADER_GAIN: "239",
-                config.NORMALIZED_HEADER_OFFSET: "150",
-                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
-                config.NORMALIZED_HEADER_DATE: "2026-01-15",
-                config.NORMALIZED_HEADER_FILTER: "B",
-                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",  # Valid
-            },
+            "flat1.fits": flat_headers_invalid,
+            "flat2.fits": flat_headers_valid,
+            "flat3.fits": flat_headers_valid,
         }
 
         mock_group_files.return_value = {
@@ -350,14 +351,9 @@ class TestGenerateMasters:
                 "2026-01-15",
                 "B",
             ): [
-                {
-                    "path": "flat1.fits",
-                    "headers": mock_get_filtered.return_value["flat1.fits"],
-                },
-                {
-                    "path": "flat2.fits",
-                    "headers": mock_get_filtered.return_value["flat2.fits"],
-                },
+                {"path": "flat1.fits", "headers": flat_headers_invalid},
+                {"path": "flat2.fits", "headers": flat_headers_valid},
+                {"path": "flat3.fits", "headers": flat_headers_valid},
             ]
         }
 
@@ -381,12 +377,172 @@ class TestGenerateMasters:
         # Should still generate script successfully
         assert len(scripts) == 1
         # Should have called find_matching_master_for_flat
-        # with valid exposure time (1.5)
+        # with valid exposure times (1.5)
         # Invalid exposure should be skipped
         assert mock_find_master.call_count == 1
         call_args = mock_find_master.call_args
         # flat_exposure_times is the 4th positional argument (index 0, 1, 2, 3)
-        assert call_args[0][3] == [1.5]  # Only valid exposure included
+        assert call_args[0][3] == [1.5, 1.5]  # Only valid exposures included
+
+    @patch("ap_common.get_filtered_metadata")
+    @patch("ap_create_master.calibrate_masters.group_files")
+    @patch("ap_create_master.calibrate_masters.get_group_metadata")
+    @patch("ap_create_master.calibrate_masters.generate_combined_script")
+    def test_warns_and_skips_group_with_insufficient_images(
+        self,
+        mock_generate_script,
+        mock_get_metadata,
+        mock_group_files,
+        mock_get_filtered,
+        tmp_path,
+        caplog,
+    ):
+        """Test that groups with fewer than 3 images are skipped with a warning."""
+        input_dir = str(tmp_path / "input")
+        output_dir = str(tmp_path / "output")
+        os.makedirs(input_dir, exist_ok=True)
+
+        bias_headers = {
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+
+        # Only 1 bias file in group
+        mock_get_filtered.return_value = {"bias1.fits": bias_headers}
+
+        mock_group_files.return_value = {
+            ("bias", "ATR585M", "-10.00", "239", "150", "Low Conversion Gain"): [
+                {"path": "bias1.fits", "headers": bias_headers},
+            ]
+        }
+
+        mock_get_metadata.return_value = {
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+
+        mock_generate_script.return_value = "// Generated script"
+
+        scripts, _ = generate_masters(input_dir, output_dir)
+
+        # Group should be skipped, no script generated
+        assert scripts == []
+        mock_generate_script.assert_not_called()
+
+        # Should log a warning about insufficient images
+        assert any(
+            "Skipping bias group" in record.message
+            and "has 1 image(s)" in record.message
+            and "need at least 3" in record.message
+            and record.levelname == "WARNING"
+            for record in caplog.records
+        )
+
+    @patch("ap_common.get_filtered_metadata")
+    @patch("ap_create_master.calibrate_masters.group_files")
+    @patch("ap_create_master.calibrate_masters.get_group_metadata")
+    @patch("ap_create_master.calibrate_masters.generate_combined_script")
+    def test_skips_insufficient_group_but_keeps_valid_groups(
+        self,
+        mock_generate_script,
+        mock_get_metadata,
+        mock_group_files,
+        mock_get_filtered,
+        tmp_path,
+        caplog,
+    ):
+        """Test that only insufficient groups are skipped; valid groups proceed."""
+        input_dir = str(tmp_path / "input")
+        output_dir = str(tmp_path / "output")
+        os.makedirs(input_dir, exist_ok=True)
+
+        bias_headers_a = {
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+        bias_headers_b = {
+            config.NORMALIZED_HEADER_TYPE: "bias",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-20.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+
+        # Return bias files only for BIAS type, empty for others
+        def get_filtered_side_effect(*args, **kwargs):
+            frame_type = kwargs.get("filters", {}).get(
+                config.NORMALIZED_HEADER_TYPE, ""
+            )
+            if frame_type == "BIAS":
+                return {
+                    "bias_a1.fits": bias_headers_a,
+                    "bias_b1.fits": bias_headers_b,
+                    "bias_b2.fits": bias_headers_b,
+                    "bias_b3.fits": bias_headers_b,
+                }
+            return {}
+
+        mock_get_filtered.side_effect = get_filtered_side_effect
+
+        # Two groups: group A has 1 file (skip), group B has 3 files (keep)
+        mock_group_files.return_value = {
+            ("bias", "ATR585M", "-10.00", "239", "150", "Low Conversion Gain"): [
+                {"path": "bias_a1.fits", "headers": bias_headers_a},
+            ],
+            ("bias", "ATR585M", "-20.00", "239", "150", "Low Conversion Gain"): [
+                {"path": "bias_b1.fits", "headers": bias_headers_b},
+                {"path": "bias_b2.fits", "headers": bias_headers_b},
+                {"path": "bias_b3.fits", "headers": bias_headers_b},
+            ],
+        }
+
+        mock_get_metadata.side_effect = [
+            {
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            },
+            {
+                config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+                config.NORMALIZED_HEADER_SETTEMP: "-20.00",
+                config.NORMALIZED_HEADER_GAIN: "239",
+                config.NORMALIZED_HEADER_OFFSET: "150",
+                config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+            },
+        ]
+
+        mock_generate_script.return_value = "// Generated script"
+
+        scripts, _ = generate_masters(input_dir, output_dir)
+
+        # Valid group should still generate a script
+        assert len(scripts) == 1
+        mock_generate_script.assert_called_once()
+
+        # Should have only 1 bias group (the one with 3 files)
+        call_args = mock_generate_script.call_args
+        assert len(call_args[0][1]) == 1  # Only 1 bias group passed
+
+        # Should log a warning for the skipped group
+        assert any(
+            "Skipping bias group" in record.message
+            and record.levelname == "WARNING"
+            for record in caplog.records
+        )
 
 
 class TestWriteMasterImagetypHeaders:

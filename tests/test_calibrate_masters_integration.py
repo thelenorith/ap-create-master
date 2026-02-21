@@ -35,6 +35,16 @@ class TestRealWorldWorkflows:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        dark_headers = {
+            config.NORMALIZED_HEADER_TYPE: "dark",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+            config.NORMALIZED_HEADER_CAMERA: "ATR585M",
+            config.NORMALIZED_HEADER_SETTEMP: "-10.00",
+            config.NORMALIZED_HEADER_GAIN: "239",
+            config.NORMALIZED_HEADER_OFFSET: "150",
+            config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
+        }
+
         # Mock dark file discovery only
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
@@ -42,15 +52,9 @@ class TestRealWorldWorkflows:
             )
             if frame_type == "DARK":
                 return {
-                    "dark1.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "dark",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
-                        config.NORMALIZED_HEADER_CAMERA: "ATR585M",
-                        config.NORMALIZED_HEADER_SETTEMP: "-10.00",
-                        config.NORMALIZED_HEADER_GAIN: "239",
-                        config.NORMALIZED_HEADER_OFFSET: "150",
-                        config.NORMALIZED_HEADER_READOUTMODE: "Low Conversion Gain",
-                    }
+                    "dark1.fits": dark_headers,
+                    "dark2.fits": dark_headers,
+                    "dark3.fits": dark_headers,
                 }
             return {}
 
@@ -65,7 +69,11 @@ class TestRealWorldWorkflows:
                 "150",
                 "ATR585M",
                 "Low Conversion Gain",
-            ): [{"path": "dark1.fits", "headers": {}}]
+            ): [
+                {"path": "dark1.fits", "headers": dark_headers},
+                {"path": "dark2.fits", "headers": dark_headers},
+                {"path": "dark3.fits", "headers": dark_headers},
+            ]
         }
 
         mock_get_metadata.return_value = {
@@ -105,19 +113,28 @@ class TestRealWorldWorkflows:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {config.NORMALIZED_HEADER_TYPE: "bias"}
+        dark_headers = {
+            config.NORMALIZED_HEADER_TYPE: "dark",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+        }
+
         # Mock both bias and dark discovery
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
                 config.NORMALIZED_HEADER_TYPE, ""
             )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
+                return {
+                    "bias1.fits": bias_headers,
+                    "bias2.fits": bias_headers,
+                    "bias3.fits": bias_headers,
+                }
             elif frame_type == "DARK":
                 return {
-                    "dark1.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "dark",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
-                    }
+                    "dark1.fits": dark_headers,
+                    "dark2.fits": dark_headers,
+                    "dark3.fits": dark_headers,
                 }
             return {}
 
@@ -125,9 +142,21 @@ class TestRealWorldWorkflows:
 
         def group_side_effect(files, frame_type):
             if frame_type == "bias":
-                return {("bias",): [{"path": "bias1.fits", "headers": {}}]}
+                return {
+                    ("bias",): [
+                        {"path": "bias1.fits", "headers": bias_headers},
+                        {"path": "bias2.fits", "headers": bias_headers},
+                        {"path": "bias3.fits", "headers": bias_headers},
+                    ]
+                }
             elif frame_type == "dark":
-                return {("dark", "60.0"): [{"path": "dark1.fits", "headers": {}}]}
+                return {
+                    ("dark", "60.0"): [
+                        {"path": "dark1.fits", "headers": dark_headers},
+                        {"path": "dark2.fits", "headers": dark_headers},
+                        {"path": "dark3.fits", "headers": dark_headers},
+                    ]
+                }
             return {}
 
         mock_group_files.side_effect = group_side_effect
@@ -172,28 +201,40 @@ class TestRealWorldWorkflows:
         dark_master_dir = str(tmp_path / "dark_masters")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {config.NORMALIZED_HEADER_TYPE: "bias"}
+        dark_headers = {
+            config.NORMALIZED_HEADER_TYPE: "dark",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+        }
+        flat_headers = {
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
+        }
+
         # Mock all three frame types
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
                 config.NORMALIZED_HEADER_TYPE, ""
             )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
+                return {
+                    "bias1.fits": bias_headers,
+                    "bias2.fits": bias_headers,
+                    "bias3.fits": bias_headers,
+                }
             elif frame_type == "DARK":
                 return {
-                    "dark1.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "dark",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
-                    }
+                    "dark1.fits": dark_headers,
+                    "dark2.fits": dark_headers,
+                    "dark3.fits": dark_headers,
                 }
             elif frame_type == "FLAT":
                 return {
-                    "flat1.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "flat",
-                        config.NORMALIZED_HEADER_FILTER: "B",
-                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
-                    }
+                    "flat1.fits": flat_headers,
+                    "flat2.fits": flat_headers,
+                    "flat3.fits": flat_headers,
                 }
             return {}
 
@@ -201,18 +242,27 @@ class TestRealWorldWorkflows:
 
         def group_side_effect(files, frame_type):
             if frame_type == "bias":
-                return {("bias",): [{"path": "bias1.fits", "headers": {}}]}
+                return {
+                    ("bias",): [
+                        {"path": "bias1.fits", "headers": bias_headers},
+                        {"path": "bias2.fits", "headers": bias_headers},
+                        {"path": "bias3.fits", "headers": bias_headers},
+                    ]
+                }
             elif frame_type == "dark":
-                return {("dark", "60.0"): [{"path": "dark1.fits", "headers": {}}]}
+                return {
+                    ("dark", "60.0"): [
+                        {"path": "dark1.fits", "headers": dark_headers},
+                        {"path": "dark2.fits", "headers": dark_headers},
+                        {"path": "dark3.fits", "headers": dark_headers},
+                    ]
+                }
             elif frame_type == "flat":
                 return {
                     ("flat", "B", "2026-01-15"): [
-                        {
-                            "path": "flat1.fits",
-                            "headers": {
-                                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"
-                            },
-                        }
+                        {"path": "flat1.fits", "headers": flat_headers},
+                        {"path": "flat2.fits", "headers": flat_headers},
+                        {"path": "flat3.fits", "headers": flat_headers},
                     ]
                 }
             return {}
@@ -259,6 +309,19 @@ class TestRealWorldWorkflows:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        dark_60_headers = {
+            config.NORMALIZED_HEADER_TYPE: "dark",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
+        }
+        dark_120_headers = {
+            config.NORMALIZED_HEADER_TYPE: "dark",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "120.0",
+        }
+        dark_300_headers = {
+            config.NORMALIZED_HEADER_TYPE: "dark",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "300.0",
+        }
+
         # Mock darks with different exposures
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
@@ -266,27 +329,36 @@ class TestRealWorldWorkflows:
             )
             if frame_type == "DARK":
                 return {
-                    "dark_60s.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "dark",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "60.0",
-                    },
-                    "dark_120s.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "dark",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "120.0",
-                    },
-                    "dark_300s.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "dark",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "300.0",
-                    },
+                    "dark_60s_1.fits": dark_60_headers,
+                    "dark_60s_2.fits": dark_60_headers,
+                    "dark_60s_3.fits": dark_60_headers,
+                    "dark_120s_1.fits": dark_120_headers,
+                    "dark_120s_2.fits": dark_120_headers,
+                    "dark_120s_3.fits": dark_120_headers,
+                    "dark_300s_1.fits": dark_300_headers,
+                    "dark_300s_2.fits": dark_300_headers,
+                    "dark_300s_3.fits": dark_300_headers,
                 }
             return {}
 
         mock_get_filtered.side_effect = side_effect
 
         mock_group_files.return_value = {
-            ("dark", "60.0"): [{"path": "dark_60s.fits", "headers": {}}],
-            ("dark", "120.0"): [{"path": "dark_120s.fits", "headers": {}}],
-            ("dark", "300.0"): [{"path": "dark_300s.fits", "headers": {}}],
+            ("dark", "60.0"): [
+                {"path": "dark_60s_1.fits", "headers": dark_60_headers},
+                {"path": "dark_60s_2.fits", "headers": dark_60_headers},
+                {"path": "dark_60s_3.fits", "headers": dark_60_headers},
+            ],
+            ("dark", "120.0"): [
+                {"path": "dark_120s_1.fits", "headers": dark_120_headers},
+                {"path": "dark_120s_2.fits", "headers": dark_120_headers},
+                {"path": "dark_120s_3.fits", "headers": dark_120_headers},
+            ],
+            ("dark", "300.0"): [
+                {"path": "dark_300s_1.fits", "headers": dark_300_headers},
+                {"path": "dark_300s_2.fits", "headers": dark_300_headers},
+                {"path": "dark_300s_3.fits", "headers": dark_300_headers},
+            ],
         }
 
         mock_get_metadata.side_effect = [
@@ -321,17 +393,27 @@ class TestRealWorldWorkflows:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {config.NORMALIZED_HEADER_TYPE: "bias"}
+
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
                 config.NORMALIZED_HEADER_TYPE, ""
             )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
+                return {
+                    "bias1.fits": bias_headers,
+                    "bias2.fits": bias_headers,
+                    "bias3.fits": bias_headers,
+                }
             return {}
 
         mock_get_filtered.side_effect = side_effect
         mock_group_files.return_value = {
-            ("bias",): [{"path": "bias1.fits", "headers": {}}]
+            ("bias",): [
+                {"path": "bias1.fits", "headers": bias_headers},
+                {"path": "bias2.fits", "headers": bias_headers},
+                {"path": "bias3.fits", "headers": bias_headers},
+            ]
         }
         mock_get_metadata.return_value = {config.NORMALIZED_HEADER_CAMERA: "ATR585M"}
         mock_generate_script.return_value = "// Generated script"
@@ -365,28 +447,31 @@ class TestRealWorldWorkflows:
         dark_master_dir = str(tmp_path / "dark_masters")
         os.makedirs(input_dir, exist_ok=True)
 
+        flat_headers = {
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
+        }
+
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
                 config.NORMALIZED_HEADER_TYPE, ""
             )
             if frame_type == "FLAT":
                 return {
-                    "flat1.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "flat",
-                        config.NORMALIZED_HEADER_FILTER: "B",
-                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
-                    }
+                    "flat1.fits": flat_headers,
+                    "flat2.fits": flat_headers,
+                    "flat3.fits": flat_headers,
                 }
             return {}
 
         mock_get_filtered.side_effect = side_effect
         mock_group_files.return_value = {
             ("flat", "B", "2026-01-15"): [
-                {
-                    "path": "flat1.fits",
-                    "headers": {config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"},
-                }
+                {"path": "flat1.fits", "headers": flat_headers},
+                {"path": "flat2.fits", "headers": flat_headers},
+                {"path": "flat3.fits", "headers": flat_headers},
             ]
         }
         mock_get_metadata.return_value = {
@@ -427,28 +512,31 @@ class TestRealWorldWorkflows:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        flat_headers = {
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
+        }
+
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
                 config.NORMALIZED_HEADER_TYPE, ""
             )
             if frame_type == "FLAT":
                 return {
-                    "flat1.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "flat",
-                        config.NORMALIZED_HEADER_FILTER: "B",
-                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
-                    }
+                    "flat1.fits": flat_headers,
+                    "flat2.fits": flat_headers,
+                    "flat3.fits": flat_headers,
                 }
             return {}
 
         mock_get_filtered.side_effect = side_effect
         mock_group_files.return_value = {
             ("flat", "B", "2026-01-15"): [
-                {
-                    "path": "flat1.fits",
-                    "headers": {config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"},
-                }
+                {"path": "flat1.fits", "headers": flat_headers},
+                {"path": "flat2.fits", "headers": flat_headers},
+                {"path": "flat3.fits", "headers": flat_headers},
             ]
         }
         mock_get_metadata.return_value = {
@@ -488,20 +576,29 @@ class TestRealWorldWorkflows:
         dark_master_dir = str(tmp_path / "dark_masters")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {config.NORMALIZED_HEADER_TYPE: "bias"}
+        flat_headers = {
+            config.NORMALIZED_HEADER_TYPE: "flat",
+            config.NORMALIZED_HEADER_FILTER: "B",
+            config.NORMALIZED_HEADER_DATE: "2026-01-15",
+            config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
+        }
+
         def side_effect(*args, **kwargs):
             frame_type = kwargs.get("filters", {}).get(
                 config.NORMALIZED_HEADER_TYPE, ""
             )
             if frame_type == "BIAS":
-                return {"bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}}
+                return {
+                    "bias1.fits": bias_headers,
+                    "bias2.fits": bias_headers,
+                    "bias3.fits": bias_headers,
+                }
             elif frame_type == "FLAT":
                 return {
-                    "flat1.fits": {
-                        config.NORMALIZED_HEADER_TYPE: "flat",
-                        config.NORMALIZED_HEADER_FILTER: "B",
-                        config.NORMALIZED_HEADER_DATE: "2026-01-15",
-                        config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5",
-                    }
+                    "flat1.fits": flat_headers,
+                    "flat2.fits": flat_headers,
+                    "flat3.fits": flat_headers,
                 }
             return {}
 
@@ -509,16 +606,19 @@ class TestRealWorldWorkflows:
 
         def group_side_effect(files, frame_type):
             if frame_type == "bias":
-                return {("bias",): [{"path": "bias1.fits", "headers": {}}]}
+                return {
+                    ("bias",): [
+                        {"path": "bias1.fits", "headers": bias_headers},
+                        {"path": "bias2.fits", "headers": bias_headers},
+                        {"path": "bias3.fits", "headers": bias_headers},
+                    ]
+                }
             elif frame_type == "flat":
                 return {
                     ("flat", "B", "2026-01-15"): [
-                        {
-                            "path": "flat1.fits",
-                            "headers": {
-                                config.NORMALIZED_HEADER_EXPOSURESECONDS: "1.5"
-                            },
-                        }
+                        {"path": "flat1.fits", "headers": flat_headers},
+                        {"path": "flat2.fits", "headers": flat_headers},
+                        {"path": "flat3.fits", "headers": flat_headers},
                     ]
                 }
             return {}
@@ -567,11 +667,18 @@ class TestOutputStructure:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {config.NORMALIZED_HEADER_TYPE: "bias"}
         mock_get_filtered.return_value = {
-            "bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}
+            "bias1.fits": bias_headers,
+            "bias2.fits": bias_headers,
+            "bias3.fits": bias_headers,
         }
         mock_group_files.return_value = {
-            ("bias",): [{"path": "bias1.fits", "headers": {}}]
+            ("bias",): [
+                {"path": "bias1.fits", "headers": bias_headers},
+                {"path": "bias2.fits", "headers": bias_headers},
+                {"path": "bias3.fits", "headers": bias_headers},
+            ]
         }
         mock_get_metadata.return_value = {config.NORMALIZED_HEADER_CAMERA: "ATR585M"}
         mock_generate_script.return_value = "// Generated script"
@@ -605,11 +712,18 @@ class TestOutputStructure:
         output_dir = str(tmp_path / "output")
         os.makedirs(input_dir, exist_ok=True)
 
+        bias_headers = {config.NORMALIZED_HEADER_TYPE: "bias"}
         mock_get_filtered.return_value = {
-            "bias1.fits": {config.NORMALIZED_HEADER_TYPE: "bias"}
+            "bias1.fits": bias_headers,
+            "bias2.fits": bias_headers,
+            "bias3.fits": bias_headers,
         }
         mock_group_files.return_value = {
-            ("bias",): [{"path": "bias1.fits", "headers": {}}]
+            ("bias",): [
+                {"path": "bias1.fits", "headers": bias_headers},
+                {"path": "bias2.fits", "headers": bias_headers},
+                {"path": "bias3.fits", "headers": bias_headers},
+            ]
         }
         mock_get_metadata.return_value = {config.NORMALIZED_HEADER_CAMERA: "ATR585M"}
         mock_generate_script.return_value = "// Generated script"

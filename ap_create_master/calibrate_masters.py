@@ -319,10 +319,19 @@ def generate_masters(
         for group_key, group_files_list in bias_groups.items():
             metadata = get_group_metadata(group_files_list[0]["headers"], "bias")
             file_paths = [f["path"] for f in group_files_list]
+            master_name = generate_master_filename(metadata, "bias")
+
+            if len(file_paths) < config.MIN_IMAGES_FOR_INTEGRATION:
+                logger.warning(
+                    f"Skipping bias group {master_name}: "
+                    f"has {len(file_paths)} image(s), "
+                    f"need at least {config.MIN_IMAGES_FOR_INTEGRATION}"
+                )
+                continue
+
             bias_groups_list.append((metadata, file_paths))
 
             # Track master file for header updates
-            master_name = generate_master_filename(metadata, "bias")
             master_file_path = str(master_dir / f"{master_name}.xisf")
             master_files_list.append((master_file_path, "bias"))
 
@@ -337,10 +346,19 @@ def generate_masters(
         for group_key, group_files_list in dark_groups.items():
             metadata = get_group_metadata(group_files_list[0]["headers"], "dark")
             file_paths = [f["path"] for f in group_files_list]
+            master_name = generate_master_filename(metadata, "dark")
+
+            if len(file_paths) < config.MIN_IMAGES_FOR_INTEGRATION:
+                logger.warning(
+                    f"Skipping dark group {master_name}: "
+                    f"has {len(file_paths)} image(s), "
+                    f"need at least {config.MIN_IMAGES_FOR_INTEGRATION}"
+                )
+                continue
+
             dark_groups_list.append((metadata, file_paths))
 
             # Track master file for header updates
-            master_name = generate_master_filename(metadata, "dark")
             master_file_path = str(master_dir / f"{master_name}.xisf")
             master_files_list.append((master_file_path, "dark"))
 
@@ -357,6 +375,15 @@ def generate_masters(
             first_file = group_files_list[0]
             metadata = get_group_metadata(first_file["headers"], "flat")
             file_paths = [f["path"] for f in group_files_list]
+            master_name = generate_master_filename(metadata, "flat")
+
+            if len(file_paths) < config.MIN_IMAGES_FOR_INTEGRATION:
+                logger.warning(
+                    f"Skipping flat group {master_name}: "
+                    f"has {len(file_paths)} image(s), "
+                    f"need at least {config.MIN_IMAGES_FOR_INTEGRATION}"
+                )
+                continue
 
             # Find matching masters
             master_bias_xisf = None
@@ -391,7 +418,6 @@ def generate_masters(
             )
 
             # Track master file for header updates
-            master_name = generate_master_filename(metadata, "flat")
             master_file_path = str(master_dir / f"{master_name}.xisf")
             master_files_list.append((master_file_path, "flat"))
 
@@ -724,6 +750,8 @@ def main() -> int:
                             group_files_list[0]["headers"], "bias"
                         )
                         file_paths = [f["path"] for f in group_files_list]
+                        if len(file_paths) < config.MIN_IMAGES_FOR_INTEGRATION:
+                            continue
                         bias_groups_list.append((metadata, file_paths))
 
                 if files_by_type["dark"]:
@@ -733,6 +761,8 @@ def main() -> int:
                             group_files_list[0]["headers"], "dark"
                         )
                         file_paths = [f["path"] for f in group_files_list]
+                        if len(file_paths) < config.MIN_IMAGES_FOR_INTEGRATION:
+                            continue
                         dark_groups_list.append((metadata, file_paths))
 
                 if files_by_type["flat"]:
@@ -741,6 +771,8 @@ def main() -> int:
                         first_file = group_files_list[0]
                         metadata = get_group_metadata(first_file["headers"], "flat")
                         file_paths = [f["path"] for f in group_files_list]
+                        if len(file_paths) < config.MIN_IMAGES_FOR_INTEGRATION:
+                            continue
 
                         master_bias_xisf = None
                         master_dark_xisf = None

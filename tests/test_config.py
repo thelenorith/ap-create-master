@@ -47,6 +47,10 @@ class TestConfig:
         assert config.NORMALIZED_HEADER_FILTER not in config.MASTER_MATCH_KEYWORDS
         assert config.NORMALIZED_HEADER_CAMERA in config.MASTER_MATCH_KEYWORDS
 
+    def test_min_images_for_integration(self):
+        """Test that MIN_IMAGES_FOR_INTEGRATION is defined and equals 3."""
+        assert config.MIN_IMAGES_FOR_INTEGRATION == 3
+
     def test_image_type_constants(self):
         """Test that PixInsight image type constants are defined."""
         assert config.IMAGE_TYPE_BIAS == 1
